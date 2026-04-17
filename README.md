@@ -19,9 +19,9 @@ Proyek Mata Kuliah KOM 1231 Rekayasa Perangkat Lunak (RPL) Semester Genap 2025/2
 
 | Lapisan | Teknologi |
 |---------|-----------|
-| **Frontend** | Next.js 15 (App Router), TypeScript, Tailwind CSS |
-| **Backend/Database** | Supabase (PostgreSQL, Auth, SSR) |
-| **Deployment** | Vercel *(TBD)* |
+| **Frontend** | --- |
+| **Backend/Database** | Supabase + Next.js |
+| **Deployment** | --- |
 
 ---
 
