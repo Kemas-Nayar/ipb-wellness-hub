@@ -50,11 +50,11 @@ npm install
 
 > ⚠️ **Jangan pernah push kredensial ke GitHub!**
 
-Minta file konfigurasi ke Kemas. Buat file baru bernama `.env.local` di root folder (sejajar dengan `package.json`), lalu isi dengan:
+Cari file konfigurasi di Supabase kita. Buat file baru bernama `.env.local` di root folder (sejajar dengan `package.json`), lalu isi dengan:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://[PROJECT_ID].supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=[KODE_ANON_KEY_DARI_KEMAS]
+NEXT_PUBLIC_SUPABASE_ANON_KEY=[KODE_ANON_KEY_ADA_DI_SUPABASE]
 ```
 
 ### 4. Setup Database (Supabase)
