@@ -23,4 +23,11 @@ Pastikan kamu sudah menginstal:
 ### 2. Instalasi Dependensi
 Buka terminal di dalam folder proyek, lalu jalankan:
 ```bash
-npm install
+npm install```
+
+### 3. Setup Variabel Lingkungan (Environment Variables)
+⚠️ PERINGATAN: Jangan pernah git add .env.local atau push file ini ke GitHub!
+Minta credential (URL dan Anon Key) ke Kemas. Buat file baru bernama .env.local di root folder (sejajar dengan package.json), dan isi dengan format berikut:
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://[PROJECT_ID].supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=[KODE_ANON_KEY_DARI_KEMAS]```
