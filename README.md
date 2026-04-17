@@ -5,7 +5,7 @@ Proyek Mata Kuliah KOM 1231 Rekayasa Perangkat Lunak (RPL) Semester Genap 2025/2
 
 ---
 
-## 👥 Kelompok 5
+## 👥 Kelompok 4
 
 | Nama | NIM | Peran |
 |------|-------|-------|
