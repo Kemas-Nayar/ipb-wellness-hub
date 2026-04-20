@@ -52,7 +52,7 @@ npm install
 
 > ⚠️ **Jangan pernah push kredensial ke GitHub!**
 
-Temukan file konfigurasi di supabase pojok kanan atas tulisan 'Connect' berwarna hijau. Buat file baru bernama `.env.local` di root folder (sejajar dengan `package.json`), lalu isi dengan:
+Temukan file konfigurasi di supabase pojok atas tulisan 'Connect' berwarna hijau. Buat file baru bernama `.env.local` di root folder (sejajar dengan `package.json`), lalu isi dengan:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://[PROJECT_ID].supabase.co
