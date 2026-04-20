@@ -1,4 +1,4 @@
-# 🏋️‍♂️ IPB Wellness Hub
+<img width="1917" height="1115" alt="image" src="https://github.com/user-attachments/assets/d3a1d5da-5799-4fba-900c-02a82d472f0e" /># 🏋️‍♂️ IPB Wellness Hub
 
 Sistem Informasi Reservasi dan Monitoring Kuota Gym IPB.  
 Proyek Mata Kuliah KOM 1231 Rekayasa Perangkat Lunak (RPL) Semester Genap 2025/2026.
@@ -104,3 +104,8 @@ Push ke branch kamu, lalu minta *review* dari anggota tim lain di GitHub sebelum
 ---
 
 Selamat ngoding! 🚀
+
+NOTE: Jika Terjadi Error coba jalankan:
+```bash
+npm install -D @tailwindcss/postcss
+```
