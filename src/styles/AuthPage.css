@@ -1,0 +1,173 @@
+.auth-page {
+  min-height: 100vh;
+  background: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 20px 40px;
+}
+
+.auth-logos {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.auth-logo-nutrigym {
+  height: 50px;
+  width: auto;
+}
+
+.auth-logo-iwh {
+  height: 50px;
+  width: auto;
+}
+
+.auth-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-title {
+  font-size: 28px;
+  font-weight: 900;
+  color: #8b0000;
+  margin: 0;
+}
+
+.auth-subtitle {
+  font-size: 13px;
+  color: #888;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.auth-input {
+  width: 100%;
+  background: white;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 30px;
+  padding: 16px 20px;
+  font-size: 14px;
+  color: #333;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.auth-input::placeholder {
+  color: #aaa;
+}
+
+.btn-yellow-full {
+  width: 100%;
+  background: linear-gradient(135deg, #f5c518, #e6b800);
+  border: none;
+  border-radius: 30px;
+  padding: 16px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a1a;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.btn-red-full {
+  width: 100%;
+  background: #b30000;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 16px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-google {
+  width: 100%;
+  background: #b30000;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.google-icon {
+  width: 24px;
+  height: 24px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 900;
+  color: #b30000;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #aaa;
+  font-size: 13px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid #ddd;
+}
+
+.auth-forgot {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  cursor: pointer;
+  margin: 0;
+}
+
+.auth-back {
+  font-size: 14px;
+  color: #8b0000;
+  cursor: pointer;
+  margin: 0;
+}
+
+.auth-footer-text {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.auth-link {
+  color: #1a3f91;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.auth-error {
+  color: #b30000;
+  font-size: 13px;
+  margin: 0;
+}
+
+.sent-body {
+  align-items: center;
+}
+
+.sent-icon {
+  font-size: 120px;
+  margin: 20px 0;
+}
