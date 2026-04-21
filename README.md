@@ -1,4 +1,5 @@
-<img width="1917" height="1115" alt="image" src="https://github.com/user-attachments/assets/d3a1d5da-5799-4fba-900c-02a82d472f0e" />
+<img width="723" height="1600" alt="WhatsApp Image 2026-04-21 at 00 32 45" src="https://github.com/user-attachments/assets/6119f35d-ef73-4e0f-8d25-a8a815e8de15" />
+
 
 # 🏋️‍♂️ IPB Wellness Hub
 
