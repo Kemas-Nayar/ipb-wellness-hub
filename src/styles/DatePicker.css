@@ -1,0 +1,188 @@
+/* Overlay */
+.datepicker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* Modal */
+.datepicker-modal {
+  background: white;
+  width: 100%;
+  height: auto;
+  max-height: 90vh;
+  border-radius: 16px 16px 0 0;
+  overflow: hidden;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+
+  @media (min-width: 480px) {
+    max-width: 390px;
+    border-radius: 20px 20px 0 0;
+  }
+}
+
+/* Header */
+.datepicker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid #eee;
+  gap: 8px;
+
+  @media (min-width: 480px) {
+    padding: 14px 20px;
+  }
+}
+
+.datepicker-cancel {
+  background: none;
+  border: none;
+  color: #b30000;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+
+  @media (min-width: 480px) {
+    font-size: 15px;
+  }
+}
+
+.datepicker-done {
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+
+  @media (min-width: 480px) {
+    font-size: 15px;
+  }
+}
+
+.datepicker-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  flex: 1;
+  text-align: center;
+
+  @media (min-width: 480px) {
+    font-size: 16px;
+  }
+}
+
+/* Picker body */
+.datepicker-body {
+  display: flex;
+  height: 160px;
+  padding: 0 6px;
+
+  @media (min-width: 480px) {
+    height: 220px;
+    padding: 0 8px;
+  }
+}
+
+/* Column wrapper */
+.picker-column-wrap {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Scrollable column */
+.picker-column {
+  height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.picker-column::-webkit-scrollbar {
+  display: none;
+}
+
+/* Item */
+.picker-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  scroll-snap-align: center;
+  font-size: 13px;
+  color: #aaa;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s, font-size 0.15s, font-weight 0.15s;
+  padding: 8px 0;
+
+  @media (min-width: 480px) {
+    font-size: 15px;
+    padding: 12px 0;
+  }
+}
+
+/* Highlight box di tengah */
+.picker-highlight {
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 36px;
+  background: #fef3cc;
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 0;
+
+  @media (min-width: 480px) {
+    left: 4px;
+    right: 4px;
+    height: 44px;
+    border-radius: 10px;
+  }
+}
+
+.picker-column {
+  height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  position: relative;
+  z-index: 2; /* ← tambah ini, biar kolom di atas highlight */
+}
+
+/* Gradient fade atas & bawah */
+.picker-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 60px;
+  pointer-events: none;
+  z-index: 2;
+
+  @media (min-width: 480px) {
+    height: 80px;
+  }
+}
+
+.picker-fade-top {
+  top: 0;
+  background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+}
+
+.picker-fade-bottom {
+  bottom: 0;
+  background: linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+}

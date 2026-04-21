@@ -3,24 +3,41 @@
   background: #f5f5f5;
   display: flex;
   flex-direction: column;
-  padding: 20px 20px 40px;
+  padding: 16px 16px 32px;
+
+  @media (min-width: 640px) {
+    padding: 20px 20px 40px;
+  }
 }
 
 .auth-logos {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 32px;
+  gap: 6px;
+  margin-bottom: 24px;
+
+  @media (min-width: 640px) {
+    gap: 8px;
+    margin-bottom: 32px;
+  }
 }
 
 .auth-logo-nutrigym {
-  height: 50px;
+  height: 40px;
   width: auto;
+
+  @media (min-width: 640px) {
+    height: 50px;
+  }
 }
 
 .auth-logo-iwh {
-  height: 50px;
+  height: 40px;
   width: auto;
+
+  @media (min-width: 640px) {
+    height: 50px;
+  }
 }
 
 .auth-body {
@@ -30,29 +47,51 @@
 }
 
 .auth-title {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 900;
   color: #8b0000;
   margin: 0;
+  line-height: 1.2;
+
+  @media (min-width: 640px) {
+    font-size: 28px;
+  }
 }
 
 .auth-subtitle {
-  font-size: 13px;
+  font-size: 12px;
   color: #888;
   line-height: 1.5;
   margin: 0;
+
+  @media (min-width: 640px) {
+    font-size: 13px;
+  }
 }
 
 .auth-input {
   width: 100%;
   background: white;
   border: 1.5px solid #e8e8e8;
-  border-radius: 30px;
-  padding: 16px 20px;
-  font-size: 14px;
+  border-radius: 24px;
+  padding: 12px 16px;
+  font-size: 13px;
   color: #333;
   outline: none;
   box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.auth-input:focus {
+  border-color: #8b0000;
+}
+
+@media (min-width: 640px) {
+  .auth-input {
+    border-radius: 30px;
+    padding: 16px 20px;
+    font-size: 14px;
+  }
 }
 
 .auth-input::placeholder {
@@ -63,13 +102,26 @@
   width: 100%;
   background: linear-gradient(135deg, #f5c518, #e6b800);
   border: none;
-  border-radius: 30px;
-  padding: 16px;
-  font-size: 15px;
+  border-radius: 24px;
+  padding: 12px;
+  font-size: 14px;
   font-weight: 700;
   color: #1a1a1a;
   cursor: pointer;
   margin-top: 4px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-yellow-full:active {
+  transform: scale(0.98);
+}
+
+@media (min-width: 640px) {
+  .btn-yellow-full {
+    border-radius: 30px;
+    padding: 16px;
+    font-size: 15px;
+  }
 }
 
 .btn-red-full {
@@ -77,11 +129,24 @@
   background: #b30000;
   color: white;
   border: none;
-  border-radius: 30px;
-  padding: 16px;
-  font-size: 15px;
+  border-radius: 24px;
+  padding: 12px;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.btn-red-full:active {
+  transform: scale(0.98);
+}
+
+@media (min-width: 640px) {
+  .btn-red-full {
+    border-radius: 30px;
+    padding: 16px;
+    font-size: 15px;
+  }
 }
 
 .btn-google {
@@ -89,28 +154,48 @@
   background: #b30000;
   color: white;
   border: none;
-  border-radius: 30px;
-  padding: 16px;
-  font-size: 14px;
+  border-radius: 24px;
+  padding: 12px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.btn-google:active {
+  transform: scale(0.98);
+}
+
+@media (min-width: 640px) {
+  .btn-google {
+    border-radius: 30px;
+    padding: 16px;
+    font-size: 14px;
+    gap: 12px;
+  }
 }
 
 .google-icon {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   background: white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 900;
   color: #b30000;
+
+  @media (min-width: 640px) {
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+  }
 }
 
 .auth-divider {
@@ -118,7 +203,11 @@
   align-items: center;
   gap: 8px;
   color: #aaa;
-  font-size: 13px;
+  font-size: 12px;
+
+  @media (min-width: 640px) {
+    font-size: 13px;
+  }
 }
 
 .auth-divider::before,
@@ -130,25 +219,36 @@
 
 .auth-forgot {
   text-align: center;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: #333;
   cursor: pointer;
   margin: 0;
+
+  @media (min-width: 640px) {
+    font-size: 14px;
+  }
 }
 
 .auth-back {
-  font-size: 14px;
+  font-size: 13px;
   color: #8b0000;
   cursor: pointer;
   margin: 0;
+
+  @media (min-width: 640px) {
+    font-size: 14px;
+  }
 }
 
 .auth-footer-text {
   text-align: center;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
-  margin: 0;
+
+  @media (min-width: 640px) {
+    font-size: 13px;
+  }
 }
 
 .auth-link {

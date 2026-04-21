@@ -1,0 +1,157 @@
+.profile-page {
+  min-height: 100vh;
+  background: #fdf0f0;
+  padding-bottom: 32px;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 16px 12px;
+  background: white;
+}
+
+.profile-back {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+}
+
+.profile-header-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #222;
+}
+
+.profile-card {
+  background: white;
+  margin: 0 0 8px;
+}
+
+.profile-banner {
+  height: 60px;
+  background: #fce8e8;
+  border-radius: 0 0 16px 16px;
+
+  @media (min-width: 640px) {
+    height: 80px;
+    border-radius: 0 0 20px 20px;
+  }
+}
+
+.profile-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px 16px;
+
+  @media (min-width: 640px) {
+    gap: 14px;
+    padding: 16px 20px 20px;
+  }
+}
+
+.profile-avatar {
+  width: 48px;
+  height: 48px;
+  background: #C8102E;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  flex-shrink: 0;
+
+  @media (min-width: 640px) {
+    width: 60px;
+    height: 60px;
+    font-size: 22px;
+  }
+}
+
+.profile-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #222;
+  margin: 0 0 2px;
+  line-height: 1.2;
+
+  @media (min-width: 640px) {
+    font-size: 18px;
+  }
+}
+
+.profile-email {
+  font-size: 12px;
+  color: #888;
+  margin: 0;
+
+  @media (min-width: 640px) {
+    font-size: 13px;
+  }
+}
+
+.profile-section-label {
+  font-size: 12px;
+  color: #aaa;
+  padding: 10px 14px 4px;
+
+  @media (min-width: 640px) {
+    font-size: 13px;
+    padding: 12px 20px 6px;
+  }
+}
+
+.profile-menu-group {
+  background: white;
+  margin: 0 0 8px;
+}
+
+.profile-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 14px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid #f5f5f5;
+  cursor: pointer;
+  text-align: left;
+
+  @media (min-width: 640px) {
+    gap: 14px;
+    padding: 16px 20px;
+  }
+}
+
+.profile-menu-item:last-child {
+  border-bottom: none;
+}
+
+.profile-menu-icon {
+  font-size: 20px;
+  width: 28px;
+  text-align: center;
+}
+
+.profile-menu-label {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: #222;
+
+  @media (min-width: 640px) {
+    font-size: 15px;
+  }
+}
+
+.profile-menu-icon.red { color: #C8102E; }
+.profile-menu-label.red { color: #C8102E; }

@@ -1,0 +1,334 @@
+.res-page, .res-confirm-page, .res-success-page {
+  min-height: 100vh;
+  background: #fdf4f4;
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+.res-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #fdf4f4;
+}
+
+.res-back-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #1a1a1a;
+}
+
+.res-header-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+  flex: 1;
+}
+
+.res-help-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid #ccc;
+  background: none;
+  font-size: 14px;
+  color: #888;
+  cursor: pointer;
+}
+
+.res-body {
+  padding: 8px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Calendar */
+.res-calendar-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 16px;
+}
+
+.res-cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.res-cal-arrow {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #CC2222;
+  padding: 0 8px;
+}
+
+.res-cal-month {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.res-cal-year {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.res-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.res-cal-dayname {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  padding: 6px 0;
+}
+
+.res-cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  background: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  color: #1a1a1a;
+}
+
+.res-cal-other { color: #ccc; }
+.res-cal-past { color: #ccc; cursor: default; }
+
+.res-cal-today {
+  border: 1.5px solid #aaa;
+  font-weight: 700;
+}
+
+.res-cal-selected {
+  background: #FFD24D !important;
+  font-weight: 700;
+  border: none;
+}
+
+/* Time Slots */
+.res-slots-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  gap: 12px;
+}
+
+.res-slot-btn {
+  flex: 1;
+  padding: 12px 8px;
+  border: 2px solid #ddd;
+  border-radius: 25px;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  color: #1a1a1a;
+}
+
+.res-slot-selected {
+  border-color: #FFD24D;
+  background: #fffbea;
+}
+
+.res-btn-yellow {
+  width: 100%;
+  padding: 16px;
+  background: #FFD24D;
+  border: none;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  color: #1a1a1a;
+}
+
+.res-btn-yellow:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Confirm */
+.res-confirm-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.res-confirm-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px;
+  width: 100%;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.res-confirm-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.res-confirm-cal-icon { font-size: 64px; }
+
+.res-confirm-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.res-confirm-label {
+  font-size: 13px;
+  color: #888;
+  margin: 0 0 10px 0;
+}
+
+.res-confirm-date-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.res-confirm-cal-sm { font-size: 28px; }
+
+.res-confirm-date {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.res-confirm-time {
+  font-size: 13px;
+  color: #888;
+  margin: 4px 0 0 0;
+}
+
+.res-confirm-divider {
+  height: 1px;
+  background: #eee;
+  margin-bottom: 20px;
+}
+
+.res-confirm-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.res-btn-cancel {
+  flex: 1;
+  padding: 14px;
+  border: 1.5px solid #ddd;
+  border-radius: 25px;
+  background: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  color: #1a1a1a;
+}
+
+.res-btn-confirm {
+  flex: 1;
+  padding: 14px;
+  background: #FFD24D;
+  border: none;
+  border-radius: 25px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  color: #1a1a1a;
+}
+
+/* Success */
+.res-success-page {
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  background: #fff;
+  gap: 16px;
+  text-align: center;
+}
+
+.res-success-icon {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  margin-bottom: 16px;
+}
+
+.res-confetti {
+  position: absolute;
+  font-size: 80px;
+  top: -10px;
+  left: -10px;
+  z-index: 0;
+}
+
+.res-check-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, #4fc3f7, #0288d1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  color: white;
+  z-index: 1;
+  box-shadow: 0 8px 24px rgba(2, 136, 209, 0.3);
+}
+
+.res-success-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.res-success-desc {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+.res-success-page .res-btn-yellow {
+  margin-top: 24px;
+  max-width: 340px;
+}

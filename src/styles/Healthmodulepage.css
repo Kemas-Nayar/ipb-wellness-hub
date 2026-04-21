@@ -1,0 +1,457 @@
+/* ─── BASE ─────────────────────────────────────────────────────────────────── */
+.hm-page, .hm-detail-page {
+  min-height: 100vh;
+  background: #F5F5F5;
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+.hm-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-family: 'Poppins', sans-serif;
+  color: #888;
+}
+
+/* ─── HEADER ────────────────────────────────────────────────────────────────── */
+.hm-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px 10px;
+  background: #F5F5F5;
+}
+
+.hm-back-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #1a1a1a;
+  padding: 0;
+  line-height: 1;
+}
+
+.hm-header-text { flex: 1; }
+
+.hm-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.hm-subtitle {
+  font-size: 12px;
+  color: #888;
+  margin: 2px 0 0;
+}
+
+.hm-help-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid #ccc;
+  background: none;
+  font-size: 14px;
+  color: #888;
+  cursor: pointer;
+}
+
+/* ─── BODY ──────────────────────────────────────────────────────────────────── */
+.hm-body {
+  flex: 1;
+  padding: 8px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ─── STATS CARD ────────────────────────────────────────────────────────────── */
+.hm-stats-card {
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+}
+
+.hm-stats-row {
+  display: flex;
+}
+
+.hm-stat {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 10px;
+}
+
+.hm-stat-red { background: #E53935; }
+.hm-stat-blue { background: #1E3A8A; }
+.hm-stat-yellow { background: #FBC02D; }
+
+.hm-stat-icon { font-size: 24px; }
+
+.hm-stat-label {
+  font-size: 10px;
+  color: rgba(255,255,255,0.85);
+  margin: 0 0 2px;
+}
+
+.hm-stat-label-sm {
+  font-size: 9px;
+  color: rgba(0,0,0,0.65);
+  margin: 0 0 2px;
+  line-height: 1.3;
+}
+
+.hm-stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.hm-stat-yellow .hm-stat-value { color: #1a1a1a; }
+
+/* Weekly Goal */
+.hm-weekly {
+  padding: 12px 14px;
+  background: #fff;
+}
+
+.hm-weekly-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.hm-weekly-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+}
+
+.hm-weekly-left {
+  font-size: 11px;
+  color: #888;
+}
+
+.hm-progress-track {
+  position: relative;
+  height: 14px;
+  background: #eee;
+  border-radius: 10px;
+  overflow: visible;
+}
+
+.hm-progress-fill {
+  height: 100%;
+  background: #E53935;
+  border-radius: 10px;
+  transition: width 0.4s;
+}
+
+.hm-progress-pct {
+  position: absolute;
+  right: -2px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #E53935;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+
+/* ─── SECTION HEADER ─────────────────────────────────────────────────────────── */
+.hm-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hm-section-bar {
+  width: 4px;
+  height: 20px;
+  background: #E53935;
+  border-radius: 2px;
+}
+
+.hm-section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.hm-section-title-plain {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+/* ─── TODAY'S WORKOUT ────────────────────────────────────────────────────────── */
+.hm-today-card {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  cursor: pointer;
+}
+
+.hm-today-thumb {
+  position: relative;
+  width: 140px;
+  min-height: 140px;
+  flex-shrink: 0;
+}
+
+.hm-today-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hm-today-info {
+  flex: 1;
+  padding: 12px 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hm-today-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.hm-today-meta {
+  font-size: 11px;
+  color: #888;
+  margin: 0;
+}
+
+.hm-today-desc {
+  font-size: 11px;
+  color: #555;
+  line-height: 1.4;
+  margin: 0;
+  flex: 1;
+}
+
+/* ─── VIDEO CARD ─────────────────────────────────────────────────────────────── */
+.hm-video-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hm-video-card {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  cursor: pointer;
+}
+
+.hm-video-thumb {
+  position: relative;
+  width: 120px;
+  height: 90px;
+  flex-shrink: 0;
+}
+
+.hm-video-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hm-play-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 36px;
+  height: 36px;
+  background: rgba(255,255,255,0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #1E3A8A;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.hm-completed-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: #4CAF50;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+.hm-video-info {
+  flex: 1;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: center;
+}
+
+.hm-video-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.hm-video-meta {
+  font-size: 11px;
+  color: #888;
+  margin: 0;
+}
+
+/* ─── TONTON BUTTON ──────────────────────────────────────────────────────────── */
+.hm-tonton-btn {
+  align-self: flex-end;
+  background: #FBC02D;
+  border: none;
+  border-radius: 20px;
+  padding: 7px 18px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  color: #1a1a1a;
+  margin-top: 4px;
+}
+
+/* ─── VIDEO OVERLAY ──────────────────────────────────────────────────────────── */
+.hm-video-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hm-video-container {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 16/9;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.hm-video-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.hm-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* ─── DETAIL PAGE ────────────────────────────────────────────────────────────── */
+.hm-detail-header {
+  padding: 14px 16px 0;
+}
+
+.hm-detail-info {
+  padding: 8px 16px 4px;
+}
+
+.hm-detail-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0 0 6px;
+}
+
+.hm-detail-desc {
+  font-size: 13px;
+  color: #666;
+  margin: 0 0 6px;
+  line-height: 1.5;
+}
+
+.hm-detail-level {
+  font-size: 13px;
+  color: #888;
+  text-align: right;
+  margin: 0;
+}
+
+.hm-detail-hero {
+  position: relative;
+  width: 100%;
+  cursor: pointer;
+}
+
+.hm-detail-hero-img {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  display: block;
+}
+
+.hm-detail-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 56px;
+  height: 56px;
+  background: rgba(255,255,255,0.92);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: #1E3A8A;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+}
+
+.hm-detail-body {
+  padding: 20px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #F5F5F5;
+  flex: 1;
+}
