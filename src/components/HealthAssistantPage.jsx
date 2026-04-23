@@ -6,7 +6,7 @@ import '../styles/HealthAssistantPage.css';
 
 const HealthAssistantPage = ({ onNavigate, user }) => {
   // useChat menggantikan useState manual untuk messages, input, dan loading
-  const { messages, input, handleInputChange, handleSubmit, isLoading, append } = useChat({
+  const { messages, input, handleInputChange, handleSubmit, isLoading, append, setInput } = useChat({
     api: '/api/chat', // Endpoint backend Vercel kita
     initialMessages: [
       {
@@ -31,10 +31,8 @@ const HealthAssistantPage = ({ onNavigate, user }) => {
 
   // Fungsi khusus untuk tombol Quick Topic agar langsung terkirim
   const handleQuickTopic = (prompt) => {
-    append({
-      role: 'user',
-      content: prompt,
-    });
+    setInput(prompt);
+    handleSubmit(); // ✅ kirim ke AI
   };
 
   return (
@@ -90,13 +88,7 @@ const HealthAssistantPage = ({ onNavigate, user }) => {
       </div>
 
       {/* Input Bar - Diubah menjadi <form> agar handleSubmit berjalan native */}
-        <form
-          className="ha-input-bar"
-          onSubmit={(e) => {
-            e.preventDefault();   // ⛔ penting
-            handleSubmit(e);
-          }}
-        >
+        <form className="ha-input-bar" onSubmit={handleSubmit}>
         <input
           className="ha-input"
           placeholder="Tulis pertanyaanmu..."
