@@ -1,4 +1,4 @@
-
+// src/components/HealthAssistantPage.jsx
 import React, { useRef, useEffect } from 'react';
 import { useChat } from '@ai-sdk/react';
 import doctorAvatar from '../assets/doctor_avatar.png';
@@ -30,10 +30,12 @@ const HealthAssistantPage = ({ onNavigate, user }) => {
   }, [messages]);
 
   // Fungsi khusus untuk tombol Quick Topic agar langsung terkirim
-  const handleQuickTopic = (prompt) => {
-    setInput(prompt);
-    handleSubmit(); // ✅ kirim ke AI
-  };
+    const handleQuickTopic = (prompt) => {
+      append({
+        role: 'user',
+        content: prompt,
+      });
+    };
 
   return (
     <div className="ha-page">
@@ -88,7 +90,12 @@ const HealthAssistantPage = ({ onNavigate, user }) => {
       </div>
 
       {/* Input Bar - Diubah menjadi <form> agar handleSubmit berjalan native */}
-        <form className="ha-input-bar" onSubmit={handleSubmit}>
+      <form
+        className="ha-input-bar"
+        onSubmit={(e) => {
+          handleSubmit(e); // ✅ kirim event asli
+        }}
+      >
         <input
           className="ha-input"
           placeholder="Tulis pertanyaanmu..."
