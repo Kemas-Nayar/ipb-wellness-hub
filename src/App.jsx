@@ -15,7 +15,7 @@ import FAQPage from "./components/FAQPage";
 import PengaturanPage from "./components/PengaturanPage";
 import GantiAkunPage from "./components/GantiAkunPage";
 import LogoutPage from "./components/LogoutPage";
-import HealthAssistantPage from './components/Healthassistantpage';
+import HealthAssistantPage from './components/HealthAssistantPage';
 import GymReservationPage from './components/Gymreservationpage';
 import HealthModulePage from './components/Healthmodulepage';
 import QRScanPage from './components/QRScanPage';
