@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { useChat } from 'ai/react';
+import { useChat } from '@ai-sdk/react';
 import doctorAvatar from '../assets/doctor_avatar.png';
 import '../styles/HealthAssistantPage.css';
 
