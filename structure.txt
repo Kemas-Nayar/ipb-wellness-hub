@@ -1,0 +1,84 @@
+.
+├── AGENTS.md
+├── CLAUDE.md
+├── eslint.config.js
+├── eslint.config.mjs
+├── index.html
+├── next.config.ts
+├── package.json
+├── package-lock.json
+├── postcss.config.mjs
+├── public
+│   ├── favicon.svg
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── icons.svg
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+├── README.md
+├── src
+│   ├── app
+│   │   ├── (admin)
+│   │   │   ├── dashboard
+│   │   │   │   └── page.tsx
+│   │   │   └── kelola-modul
+│   │   │       └── page.tsx
+│   │   ├── api
+│   │   │   ├── check-in
+│   │   │   │   └── route.ts
+│   │   │   ├── reservasi
+│   │   │   │   └── route.ts
+│   │   │   └── sesi-gym
+│   │   │       └── route.ts
+│   │   ├── (auth)
+│   │   │   └── login
+│   │   │       └── page.tsx
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   ├── (mahasiswa)
+│   │   │   ├── jadwal
+│   │   │   │   └── page.tsx
+│   │   │   └── qr-code
+│   │   │       └── page.tsx
+│   │   └── page.tsx
+│   ├── App.jsx
+│   ├── assets
+│   │   ├── header.png
+│   │   ├── icon_ai.png
+│   │   ├── icon_gizi.png
+│   │   ├── icon_konsultasi.png
+│   │   ├── icon_monitoring.png
+│   │   ├── icon_progress.png
+│   │   ├── icon_training.png
+│   │   ├── logo_iwh.png
+│   │   └── logo_nutrigym.png
+│   ├── components
+│   │   ├── BiodataPage.jsx
+│   │   ├── ForgotPasswordPage.jsx
+│   │   ├── LandingPage.jsx
+│   │   ├── LoadingScreen.jsx
+│   │   ├── LoginPage.jsx
+│   │   └── SignupPage.jsx
+│   ├── lib
+│   │   └── supabase.ts
+│   ├── main.jsx
+│   ├── styles
+│   │   ├── App.css
+│   │   ├── AuthPage.css
+│   │   ├── index.css
+│   │   ├── LandingPage.css
+│   │   └── LoadingScreen.css
+│   └── supabase.js
+├── structure.txt
+├── supabase
+│   └── migrations
+│       └── 20260417_init_schema.sql
+├── tsconfig.json
+├── utils
+│   └── supabase
+│       ├── client.ts
+│       └── server.ts
+└── vite.config.js
+
+24 directories, 58 files
