@@ -83,7 +83,7 @@ const GymReservationPage = ({ onNavigate, user }) => {
 
     try {
       // Sesuai skema: Insert ke tabel "reservasi" dengan pengguna_id dan sesi_id
-      const { error: insertError } = await supabase.from('reservations') // Ganti menjadi 'reservasi' sesuai skema
+      const { error: insertError } = await supabase.from('reservasi') // Ganti menjadi 'reservasi' sesuai skema
         .insert({
           pengguna_id: user.id, // Pastikan user.id ini terdaftar di tabel pengguna
           sesi_id: selectedSession.sesi_id,
