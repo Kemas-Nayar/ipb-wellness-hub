@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from 'react';
 import { useChat } from '@ai-sdk/react';
 import doctorAvatar from '../assets/doctor_avatar.png';
@@ -97,9 +98,13 @@ const HealthAssistantPage = ({ onNavigate, user }) => {
           onChange={handleInputChange}
           disabled={isLoading}
         />
-        <button type="submit" className="ha-send-btn" disabled={!input.trim() || isLoading}>
-          →
-        </button>
+      <button 
+        type="submit" 
+        className="ha-send-btn" 
+        disabled={!input?.trim() || isLoading}
+      >
+        →
+      </button>
       </form>
     </div>
   );
