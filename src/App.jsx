@@ -22,75 +22,89 @@ import QRScanPage from './components/QRScanPage';
 import "./styles/App.css";
 
 export default function App() {
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState('landing');
-  const [pageParams, setPageParams] = useState(null);
-  const [user, setUser] = useState(null);
+  // BUG FIX: authReady memisahkan "session sudah dicek" dari "loading animation selesai"
+  // Dulu: loading=false bisa dipicu oleh LoadingScreen (onFinish) SEBELUM getSession() selesai
+  // Akibatnya di mobile yang lambat, page masih 'landing' saat render pertama → keliatan logout
+  const [authReady, setAuthReady] = useState(false);
+  const [animDone, setAnimDone] = useState(false);
+  const [page, setPage] = useState(null); // null = belum tahu, hindari flash 'landing'
+  const [pageParams, setPageParams] = useState(null);
+  const [user, setUser] = useState(null);
 
-  const checkBiodata = async (userId) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('nama_lengkap')
-      .eq('id', userId)
-      .single();
-    if (error || !data || !data.nama_lengkap) return false;
-    return true;
-  };
+  const checkBiodata = async (userId) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('nama_lengkap')
+      .eq('id', userId)
+      .single();
+    if (error || !data || !data.nama_lengkap) return false;
+    return true;
+  };
 
-  useEffect(() => {
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        const hasBiodata = await checkBiodata(session.user.id);
-        setPage(hasBiodata ? 'home' : 'biodata');
-      }
-      setLoading(false);
-    };
-    getSession();
+  useEffect(() => {
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setUser(session?.user ?? null);
-        if (event === 'SIGNED_IN' && session?.user) {
-          const hasBiodata = await checkBiodata(session.user.id);
-          setPage(hasBiodata ? 'home' : 'biodata');
-        } else if (event === 'SIGNED_OUT') {
-          setPage('landing');
-        }
-      }
-    );
+      if (session?.user) {
+        const hasBiodata = await checkBiodata(session.user.id);
+        setPage(hasBiodata ? 'home' : 'biodata');
+      } else {
+        setPage('landing');
+      }
 
-    return () => subscription.unsubscribe();
-  }, []);
+      // Auth sudah dicek — boleh render sekarang (kalau animasi juga sudah selesai)
+      setAuthReady(true);
+    };
 
-  const handleNavigate = (target, params = null) => {
-    setPage(target);
-    setPageParams(params);
-  };
+    getSession();
 
-  if (loading) return <LoadingScreen onFinish={() => setLoading(false)} />;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setUser(session?.user ?? null);
+        if (event === 'SIGNED_IN' && session?.user) {
+          const hasBiodata = await checkBiodata(session.user.id);
+          setPage(hasBiodata ? 'home' : 'biodata');
+        } else if (event === 'SIGNED_OUT') {
+          setPage('landing');
+        }
+      }
+    );
 
-  return (
-    <div className="main-content">
-      {page === 'landing'           && <LandingPage onNavigate={handleNavigate} />}
-      {page === 'login'             && <LoginPage onNavigate={handleNavigate} />}
-      {page === 'signup'            && <SignupPage onNavigate={handleNavigate} />}
-      {page === 'forgot'            && <ForgotPasswordPage onNavigate={handleNavigate} />}
-      {page === 'home'              && <HomePage onNavigate={handleNavigate} user={user} />}
-      {page === 'biodata'           && <BiodataPage onNavigate={handleNavigate} user={user} />}
-      {page === 'notifications'     && <NotificationsPage onNavigate={handleNavigate} />}
-      {page === 'profile'           && <ProfilePage onNavigate={handleNavigate} user={user} />}
-      {page === 'personal-info'     && <PersonalInfoPage onNavigate={handleNavigate} user={user} />}
-      {page === 'riwayat-reservasi' && <RiwayatReservasiPage onNavigate={handleNavigate} user={user} />}
-      {page === 'faq'               && <FAQPage onNavigate={handleNavigate} />}
-      {page === 'pengaturan'        && <PengaturanPage onNavigate={handleNavigate} />}
-      {page === 'ganti-akun'        && <GantiAkunPage onNavigate={handleNavigate} user={user} />}
-      {page === 'logout'            && <LogoutPage onNavigate={handleNavigate} />}
-      {page === 'health-assistant'  && <HealthAssistantPage onNavigate={handleNavigate} user={user} />}
-      {page === 'gym-reservation'   && <GymReservationPage onNavigate={handleNavigate} user={user} />}
-      {page === 'health-module'     && <HealthModulePage onNavigate={handleNavigate} user={user} />}
-      {page === 'qr-scan'           && <QRScanPage onNavigate={handleNavigate} user={user} params={pageParams} />}
-    </div>
-  );
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleNavigate = (target, params = null) => {
+    setPage(target);
+    setPageParams(params);
+  };
+
+  // Tampilkan LoadingScreen sampai KEDUANYA selesai: auth dicek + animasi selesai
+  const showLoading = !authReady || !animDone;
+  if (showLoading) {
+    return <LoadingScreen onFinish={() => setAnimDone(true)} />;
+  }
+
+  return (
+    <div className="main-content">
+      {page === 'landing'           && <LandingPage onNavigate={handleNavigate} />}
+      {page === 'login'             && <LoginPage onNavigate={handleNavigate} />}
+      {page === 'signup'            && <SignupPage onNavigate={handleNavigate} />}
+      {page === 'forgot'            && <ForgotPasswordPage onNavigate={handleNavigate} />}
+      {page === 'home'              && <HomePage onNavigate={handleNavigate} user={user} />}
+      {page === 'biodata'           && <BiodataPage onNavigate={handleNavigate} user={user} />}
+      {page === 'notifications'     && <NotificationsPage onNavigate={handleNavigate} />}
+      {page === 'profile'           && <ProfilePage onNavigate={handleNavigate} user={user} />}
+      {page === 'personal-info'     && <PersonalInfoPage onNavigate={handleNavigate} user={user} />}
+      {page === 'riwayat-reservasi' && <RiwayatReservasiPage onNavigate={handleNavigate} user={user} />}
+      {page === 'faq'               && <FAQPage onNavigate={handleNavigate} />}
+      {page === 'pengaturan'        && <PengaturanPage onNavigate={handleNavigate} />}
+      {page === 'ganti-akun'        && <GantiAkunPage onNavigate={handleNavigate} user={user} />}
+      {page === 'logout'            && <LogoutPage onNavigate={handleNavigate} />}
+      {page === 'health-assistant'  && <HealthAssistantPage onNavigate={handleNavigate} user={user} />}
+      {page === 'gym-reservation'   && <GymReservationPage onNavigate={handleNavigate} user={user} />}
+      {page === 'health-module'     && <HealthModulePage onNavigate={handleNavigate} user={user} />}
+      {page === 'qr-scan'           && <QRScanPage onNavigate={handleNavigate} user={user} params={pageParams} />}
+    </div>
+  );
 }
