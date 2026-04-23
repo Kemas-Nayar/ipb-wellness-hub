@@ -90,7 +90,13 @@ const HealthAssistantPage = ({ onNavigate, user }) => {
       </div>
 
       {/* Input Bar - Diubah menjadi <form> agar handleSubmit berjalan native */}
-      <form className="ha-input-bar" onSubmit={handleSubmit}>
+        <form
+          className="ha-input-bar"
+          onSubmit={(e) => {
+            e.preventDefault();   // ⛔ penting
+            handleSubmit(e);
+          }}
+        >
         <input
           className="ha-input"
           placeholder="Tulis pertanyaanmu..."
@@ -100,8 +106,8 @@ const HealthAssistantPage = ({ onNavigate, user }) => {
         />
       <button 
         type="submit" 
-        className="ha-send-btn" 
-        disabled={!input?.trim() || isLoading}
+        className="ha-send-btn"
+        disabled={isLoading}
       >
         →
       </button>
