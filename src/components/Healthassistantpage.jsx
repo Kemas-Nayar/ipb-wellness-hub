@@ -97,7 +97,11 @@ const HealthAssistantPage = ({ onNavigate, user }) => {
           onChange={handleInputChange}
           disabled={isLoading}
         />
-      <button type="submit" className="ha-send-btn" disabled={!input?.trim() || isLoading}>
+      <button 
+        type="submit" 
+        className="ha-send-btn" 
+        disabled={!input?.trim() || isLoading}
+      >
         →
       </button>
       </form>
