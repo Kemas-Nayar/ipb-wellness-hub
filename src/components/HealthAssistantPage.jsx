@@ -7,7 +7,8 @@ import '../styles/HealthAssistantPage.css';
 const HealthAssistantPage = ({ onNavigate, user }) => {
   const [error, setError] = useState(null);
 
-  const { messages, input, setInput, handleInputChange, isLoading, append } = useChat({
+  // Mengambil fungsi bawaan (native) dari Vercel AI SDK
+  const { messages, input, handleInputChange, handleSubmit, isLoading, append } = useChat({
     api: '/api/chat',
     initialMessages: [
       {
@@ -24,28 +25,12 @@ const HealthAssistantPage = ({ onNavigate, user }) => {
 
   const bottomRef = useRef(null);
 
+  // Otomatis scroll ke bawah setiap ada chat baru
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // ✅ FIX: Check if input has actual content (not just whitespace)
-  const hasContent = input && input.trim().length > 0;
-  const isButtonEnabled = hasContent && !isLoading;
-
-  const sendMessage = () => {
-    if (!hasContent || isLoading) return;
-    
-    setError(null); // Clear error when sending new message
-    
-    append({
-      role: 'user',
-      content: input.trim(),
-    });
-
-    setInput('');
-  };
-
-  // ✅ Khusus Quick Topic tetap pakai parameter karena nilainya statis/luar state
+  // Fungsi khusus untuk Quick Topics (memakai append karena inputnya dari luar state text)
   const handleQuickTopic = (prompt) => {
     if (isLoading) return;
     setError(null);
@@ -74,14 +59,14 @@ const HealthAssistantPage = ({ onNavigate, user }) => {
 
       <div className="ha-body">
         <div className="ha-chat-area">
-          {/* Error Message */}
+          {/* Menampilkan pesan error jika internet/API bermasalah */}
           {error && (
             <div className="ha-error-msg">
               {error}
             </div>
           )}
 
-          {/* Messages */}
+          {/* Menampilkan Balon Chat */}
           {messages.map((msg) => (
             <div key={msg.id} className={`ha-msg-row ${msg.role === 'user' ? 'ha-msg-user' : 'ha-msg-ai'}`}>
               {msg.role === 'assistant' && (
@@ -93,7 +78,7 @@ const HealthAssistantPage = ({ onNavigate, user }) => {
             </div>
           ))}
 
-          {/* Loading Indicator */}
+          {/* Indikator Animasi Loading */}
           {isLoading && (
             <div className="ha-msg-row ha-msg-ai">
               <img src={doctorAvatar} className="ha-avatar" alt="AI" />
@@ -105,6 +90,7 @@ const HealthAssistantPage = ({ onNavigate, user }) => {
           <div ref={bottomRef} />
         </div>
 
+        {/* Tombol Topik Instan */}
         <div className="ha-quick-topics">
           {quickTopics.map((t, i) => (
             <button 
@@ -119,33 +105,37 @@ const HealthAssistantPage = ({ onNavigate, user }) => {
         </div>
       </div>
 
-      <div className="ha-input-bar">
+      {/* Input Form yang Super Aman 
+        - handleSubmit bawaan Vercel otomatis mereset input kotak teks
+        - <form> memastikan tombol Enter bekerja tanpa bentrok
+      */}
+      <form 
+        className="ha-input-bar" 
+        onSubmit={(e) => {
+          e.preventDefault(); 
+          if (!input?.trim() || isLoading) return; 
+          handleSubmit(e); 
+        }}
+      >
         <input
           className="ha-input"
           placeholder="Tulis pertanyaanmu..."
           value={input}
           onChange={(e) => {
             handleInputChange(e);
-            setError(null); // Clear error when typing
+            setError(null);
           }}
           disabled={isLoading}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              sendMessage();
-            }
-          }}
         />
         <button
-          type="button"
+          type="submit"
           className="ha-send-btn"
-          disabled={!isButtonEnabled}
-          onClick={sendMessage}
-          title={isLoading ? 'Menunggu respons...' : hasContent ? 'Kirim pesan' : 'Tulis pesan terlebih dahulu'}
+          disabled={!input?.trim() || isLoading}
+          title={isLoading ? 'Menunggu respons...' : 'Kirim pesan'}
         >
           →
         </button>
-      </div>
+      </form>
     </div>
   );
 };
