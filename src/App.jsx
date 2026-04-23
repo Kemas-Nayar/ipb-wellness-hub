@@ -86,9 +86,12 @@ export default function App() {
   };
 
   // Selama loading atau page belum ditentukan, tampilkan loading screen
-  if (loading || page === null) {
-    return <LoadingScreen onFinish={() => setLoading(false)} />;
-  }
+  // if (loading || page === null) {
+  //   return <LoadingScreen onFinish={() => setLoading(false)} />;
+  // }
+  
+  if (loading) return <div style={{color: 'white', padding: '20px'}}>SABAR... LAGI CEK AUTH...</div>;
+  if (page === null) return <div style={{color: 'white', padding: '20px'}}>PAGE MASIH NULL...</div>;
 
   return (
     <div className="main-content">
