@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "./supabase";
 import LoadingScreen from "./components/LoadingScreen";
 import LandingPage from "./components/LandingPage";
@@ -22,9 +22,8 @@ import QRScanPage from './components/QRScanPage';
 import "./styles/App.css";
 
 export default function App() {
-  const [authReady, setAuthReady] = useState(false);
-  const [animDone, setAnimDone] = useState(false);
-  const [page, setPage] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState('landing');
   const [pageParams, setPageParams] = useState(null);
   const [user, setUser] = useState(null);
 
@@ -48,7 +47,8 @@ export default function App() {
       } else {
         setPage('landing');
       }
-      setAuthReady(true);
+      // Auth sudah selesai dicek, baru boleh hide loading
+      setLoading(false);
     };
     getSession();
 
@@ -72,35 +72,30 @@ export default function App() {
     setPageParams(params);
   };
 
-  // useCallback supaya referensi fungsi stabil antar render.
-  // Tanpa ini, LoadingScreen useEffect([onFinish]) reset timer tiap render → layar putih.
-  const handleAnimDone = useCallback(() => setAnimDone(true), []);
-
-  const showLoading = !authReady || !animDone;
-  if (showLoading) {
-    return <LoadingScreen onFinish={handleAnimDone} />;
-  }
-
+  // LoadingScreen ditampilkan tapi DI BELAKANG konten yang sudah siap.
+  // Ini memastikan animasi loading tetap jalan, tapi logic routing
+  // tidak bergantung pada kapan animasi selesai.
   return (
     <div className="main-content">
-      {page === 'landing'           && <LandingPage onNavigate={handleNavigate} />}
-      {page === 'login'             && <LoginPage onNavigate={handleNavigate} />}
-      {page === 'signup'            && <SignupPage onNavigate={handleNavigate} />}
-      {page === 'forgot'            && <ForgotPasswordPage onNavigate={handleNavigate} />}
-      {page === 'home'              && <HomePage onNavigate={handleNavigate} user={user} />}
-      {page === 'biodata'           && <BiodataPage onNavigate={handleNavigate} user={user} />}
-      {page === 'notifications'     && <NotificationsPage onNavigate={handleNavigate} />}
-      {page === 'profile'           && <ProfilePage onNavigate={handleNavigate} user={user} />}
-      {page === 'personal-info'     && <PersonalInfoPage onNavigate={handleNavigate} user={user} />}
-      {page === 'riwayat-reservasi' && <RiwayatReservasiPage onNavigate={handleNavigate} user={user} />}
-      {page === 'faq'               && <FAQPage onNavigate={handleNavigate} />}
-      {page === 'pengaturan'        && <PengaturanPage onNavigate={handleNavigate} />}
-      {page === 'ganti-akun'        && <GantiAkunPage onNavigate={handleNavigate} user={user} />}
-      {page === 'logout'            && <LogoutPage onNavigate={handleNavigate} />}
-      {page === 'health-assistant'  && <HealthAssistantPage onNavigate={handleNavigate} user={user} />}
-      {page === 'gym-reservation'   && <GymReservationPage onNavigate={handleNavigate} user={user} />}
-      {page === 'health-module'     && <HealthModulePage onNavigate={handleNavigate} user={user} />}
-      {page === 'qr-scan'           && <QRScanPage onNavigate={handleNavigate} user={user} params={pageParams} />}
+      {loading && <LoadingScreen />}
+      {!loading && page === 'landing'           && <LandingPage onNavigate={handleNavigate} />}
+      {!loading && page === 'login'             && <LoginPage onNavigate={handleNavigate} />}
+      {!loading && page === 'signup'            && <SignupPage onNavigate={handleNavigate} />}
+      {!loading && page === 'forgot'            && <ForgotPasswordPage onNavigate={handleNavigate} />}
+      {!loading && page === 'home'              && <HomePage onNavigate={handleNavigate} user={user} />}
+      {!loading && page === 'biodata'           && <BiodataPage onNavigate={handleNavigate} user={user} />}
+      {!loading && page === 'notifications'     && <NotificationsPage onNavigate={handleNavigate} />}
+      {!loading && page === 'profile'           && <ProfilePage onNavigate={handleNavigate} user={user} />}
+      {!loading && page === 'personal-info'     && <PersonalInfoPage onNavigate={handleNavigate} user={user} />}
+      {!loading && page === 'riwayat-reservasi' && <RiwayatReservasiPage onNavigate={handleNavigate} user={user} />}
+      {!loading && page === 'faq'               && <FAQPage onNavigate={handleNavigate} />}
+      {!loading && page === 'pengaturan'        && <PengaturanPage onNavigate={handleNavigate} />}
+      {!loading && page === 'ganti-akun'        && <GantiAkunPage onNavigate={handleNavigate} user={user} />}
+      {!loading && page === 'logout'            && <LogoutPage onNavigate={handleNavigate} />}
+      {!loading && page === 'health-assistant'  && <HealthAssistantPage onNavigate={handleNavigate} user={user} />}
+      {!loading && page === 'gym-reservation'   && <GymReservationPage onNavigate={handleNavigate} user={user} />}
+      {!loading && page === 'health-module'     && <HealthModulePage onNavigate={handleNavigate} user={user} />}
+      {!loading && page === 'qr-scan'           && <QRScanPage onNavigate={handleNavigate} user={user} params={pageParams} />}
     </div>
   );
 }
