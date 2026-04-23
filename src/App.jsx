@@ -15,45 +15,61 @@ import FAQPage from "./components/FAQPage";
 import PengaturanPage from "./components/PengaturanPage";
 import GantiAkunPage from "./components/GantiAkunPage";
 import LogoutPage from "./components/LogoutPage";
-import HealthAssistantPage from './components/Healthassistantpage';
-import GymReservationPage from './components/Gymreservationpage';
+import HealthAssistantPage from './components/HealthAssistantPage';
+import GymReservationPage from './components/GymReservationPage';
 import HealthModulePage from './components/Healthmodulepage';
 import QRScanPage from './components/QRScanPage';
 import "./styles/App.css";
 
 export default function App() {
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState('landing');
+  const [page, setPage] = useState(null); // Ubah dari 'landing' ke null untuk cegah auto-logout
   const [pageParams, setPageParams] = useState(null);
   const [user, setUser] = useState(null);
 
   const checkBiodata = async (userId) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('nama_lengkap')
-      .eq('id', userId)
-      .single();
-    if (error || !data || !data.nama_lengkap) return false;
-    return true;
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('nama_lengkap')
+        .eq('id', userId)
+        .single();
+      
+      if (error || !data || !data.nama_lengkap) return false;
+      return true;
+    } catch (err) {
+      return false;
+    }
   };
 
   useEffect(() => {
-    const getSession = async () => {
+    const initAuth = async () => {
+      // 1. Cek session yang ada di localStorage saat refresh
       const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        const hasBiodata = await checkBiodata(session.user.id);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+
+      if (currentUser) {
+        const hasBiodata = await checkBiodata(currentUser.id);
         setPage(hasBiodata ? 'home' : 'biodata');
+      } else {
+        setPage('landing');
       }
+      
+      // Matikan loading HANYA setelah kita tahu status user
       setLoading(false);
     };
-    getSession();
 
+    initAuth();
+
+    // 2. Listen perubahan auth (login, logout, dsb)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        setUser(session?.user ?? null);
-        if (event === 'SIGNED_IN' && session?.user) {
-          const hasBiodata = await checkBiodata(session.user.id);
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+
+        if (event === 'SIGNED_IN' && currentUser) {
+          const hasBiodata = await checkBiodata(currentUser.id);
           setPage(hasBiodata ? 'home' : 'biodata');
         } else if (event === 'SIGNED_OUT') {
           setPage('landing');
@@ -69,7 +85,10 @@ export default function App() {
     setPageParams(params);
   };
 
-  if (loading) return <LoadingScreen onFinish={() => setLoading(false)} />;
+  // Selama loading atau page belum ditentukan, tampilkan loading screen
+  if (loading || page === null) {
+    return <LoadingScreen onFinish={() => setLoading(false)} />;
+  }
 
   return (
     <div className="main-content">
