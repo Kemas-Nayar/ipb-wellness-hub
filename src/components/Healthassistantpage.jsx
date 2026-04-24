@@ -1,21 +1,21 @@
-import React, { useRef, useEffect } from 'react';
-import { useChat } from '@ai-sdk/react';
+import React, { useState, useRef, useEffect } from 'react';
 import doctorAvatar from '../assets/doctor_avatar.png';
 import '../styles/HealthAssistantPage.css';
 
-const HealthAssistantPage = ({ onNavigate, user }) => {
-  // useChat menggantikan useState manual untuk messages, input, dan loading
-  const { messages, input, handleInputChange, handleSubmit, isLoading, append } = useChat({
-    api: '/api/chat', // Endpoint backend Vercel kita
-    initialMessages: [
-      {
-        id: 'welcome-message',
-        role: 'assistant',
-        content: 'Tentu! Aku disini untuk membantumu! Apa yang mau kau tanyakan tentang kesehatanmu?',
-      },
-    ],
-  });
+const WELCOME = {
+  id: 'welcome-message',
+  role: 'assistant',
+  content: 'Tentu! Aku disini untuk membantumu! Apa yang mau kau tanyakan tentang kesehatanmu?',
+};
 
+const SYSTEM_PROMPT = `Kamu adalah Health Assistant bernama Nuri dari IPB Wellness Hub. 
+Kamu membantu pengguna dengan pertanyaan seputar kesehatan, gizi, olahraga, dan gaya hidup sehat. 
+Jawab dalam Bahasa Indonesia, ramah, dan informatif. Jangan memberikan diagnosis medis.`;
+
+const HealthAssistantPage = ({ onNavigate, user }) => {
+  const [messages, setMessages] = useState([WELCOME]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const bottomRef = useRef(null);
 
   const quickTopics = [
@@ -28,12 +28,66 @@ const HealthAssistantPage = ({ onNavigate, user }) => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Fungsi khusus untuk tombol Quick Topic agar langsung terkirim
-  const handleQuickTopic = (prompt) => {
-    append({
-      role: 'user',
-      content: prompt,
-    });
+  const sendMessage = async (text) => {
+    if (!text.trim() || isLoading) return;
+
+    const userMsg = { id: Date.now().toString(), role: 'user', content: text };
+    const updatedMessages = [...messages, userMsg];
+    setMessages(updatedMessages);
+    setInput('');
+    setIsLoading(true);
+
+    // Format history untuk Gemini (role: user/model, bukan assistant)
+    // Gemini tidak support system prompt di sini, jadi kita inject ke pesan pertama
+    const history = updatedMessages
+      .filter(m => m.id !== 'welcome-message')
+      .map(m => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }],
+      }));
+
+    // Inject system prompt sebagai context di awal
+    const contents = [
+      { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
+      { role: 'model', parts: [{ text: 'Baik, saya mengerti. Saya siap membantu!' }] },
+      ...history,
+    ];
+
+    try {
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      console.log('API KEY:', apiKey);
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents }),
+        }
+      );
+
+      const data = await response.json();
+      const reply =
+        data?.candidates?.[0]?.content?.parts?.[0]?.text ??
+        'Maaf, aku tidak bisa menjawab saat ini.';
+
+      setMessages(prev => [
+        ...prev,
+        { id: Date.now().toString() + '-ai', role: 'assistant', content: reply },
+      ]);
+    } catch (err) {
+      console.error('Chat error:', err);
+      setMessages(prev => [
+        ...prev,
+        { id: Date.now().toString() + '-err', role: 'assistant', content: 'Maaf, terjadi kesalahan. Coba lagi ya!' },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    sendMessage(input);
   };
 
   return (
@@ -51,21 +105,17 @@ const HealthAssistantPage = ({ onNavigate, user }) => {
       {/* Chat Area */}
       <div className="ha-body">
         <div className="ha-chat-area">
-
-          {/* Messages */}
           {messages.map((msg) => (
             <div key={msg.id} className={`ha-msg-row ${msg.role === 'user' ? 'ha-msg-user' : 'ha-msg-ai'}`}>
               {msg.role === 'assistant' && (
                 <img src={doctorAvatar} className="ha-avatar" alt="AI" />
               )}
               <div className={`ha-bubble ${msg.role === 'assistant' ? 'ha-bubble-ai' : 'ha-bubble-user'}`}>
-                {/* Vercel AI SDK menggunakan 'content', bukan 'text' */}
-                {msg.content} 
+                {msg.content}
               </div>
             </div>
           ))}
 
-          {/* Loading Indicator */}
           {isLoading && (
             <div className="ha-msg-row ha-msg-ai">
               <img src={doctorAvatar} className="ha-avatar" alt="AI" />
@@ -81,29 +131,25 @@ const HealthAssistantPage = ({ onNavigate, user }) => {
         {/* Quick Topics */}
         <div className="ha-quick-topics">
           {quickTopics.map((t, i) => (
-            <button key={i} className="ha-topic-btn" onClick={() => handleQuickTopic(t.prompt)} disabled={isLoading}>
+            <button key={i} className="ha-topic-btn" onClick={() => sendMessage(t.prompt)} disabled={isLoading}>
               {t.label}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Input Bar - Diubah menjadi <form> agar handleSubmit berjalan native */}
+      {/* Input Bar */}
       <form className="ha-input-bar" onSubmit={handleSubmit}>
         <input
           className="ha-input"
           placeholder="Tulis pertanyaanmu..."
           value={input}
-          onChange={handleInputChange}
+          onChange={(e) => setInput(e.target.value)}
           disabled={isLoading}
         />
-      <button 
-        type="submit" 
-        className="ha-send-btn" 
-        disabled={!input?.trim() || isLoading}
-      >
-        →
-      </button>
+        <button type="submit" className="ha-send-btn" disabled={!input.trim() || isLoading}>
+          →
+        </button>
       </form>
     </div>
   );
