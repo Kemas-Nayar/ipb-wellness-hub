@@ -13,7 +13,7 @@ export async function POST(req) {
   const { messages } = await req.json();
 
   const result = await streamText({
-    model: google('gemini-1.5-flash'),
+    model: google('gemini-2.0-flash'),
     messages,
     system: 'Kamu adalah Health Assistant bernama Nuri dari IPB Wellness Hub...',
   });
