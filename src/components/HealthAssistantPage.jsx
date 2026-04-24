@@ -57,7 +57,7 @@ const HealthAssistantPage = ({ onNavigate, user }) => {
       const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
       console.log('API KEY:', apiKey);
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyBobFpJ-lz6A2Og8u1bVa9bVLYCqIfxwWM`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
