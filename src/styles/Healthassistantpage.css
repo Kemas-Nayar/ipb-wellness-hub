@@ -1,25 +1,37 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
-/* ─── Base ─────────────────────────────────────────────────────────────────── */
+/* Base */
 .ha-page {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: #fdf4f4;
+  background: #F3F4F6;
   font-family: 'Poppins', sans-serif;
-  max-width: 480px;
-  margin: 0 auto;
   overflow: hidden;
   position: relative;
 }
 
-/* ─── Header ───────────────────────────────────────────────────────────────── */
+/* Sidebar (hidden on mobile) */
+.ha-sidebar {
+  display: none;
+}
+
+/* Main panel wrapper */
+.ha-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Header */
 .ha-header {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 14px 16px;
   background: #fff;
+  max-width: 100%;
   border-bottom: 1px solid rgba(204, 34, 34, 0.08);
   box-shadow: 0 2px 12px rgba(204, 34, 34, 0.06);
   position: relative;
@@ -110,7 +122,7 @@
 .ha-clear-btn:hover  { color: #CC2222; background: #fce8e8; }
 .ha-clear-btn:active { transform: scale(0.9); }
 
-/* ─── Body ─────────────────────────────────────────────────────────────────── */
+/* Body */
 .ha-body {
   flex: 1;
   overflow-y: auto;
@@ -150,7 +162,7 @@
   gap: 12px;
 }
 
-/* ─── Message rows ──────────────────────────────────────────────────────────── */
+/* Message rows */
 .ha-msg-row {
   display: flex;
   gap: 8px;
@@ -177,7 +189,7 @@
   box-shadow: 0 2px 6px rgba(204,34,34,0.1);
 }
 
-/* ─── Bubbles ───────────────────────────────────────────────────────────────── */
+/* Bubbles */
 .ha-bubble {
   max-width: 76%;
   padding: 11px 14px;
@@ -202,7 +214,7 @@
   font-weight: 500;
 }
 
-/* ─── Typing indicator ──────────────────────────────────────────────────────── */
+/* Typing indicator */
 .ha-typing {
   display: flex;
   gap: 5px;
@@ -226,7 +238,7 @@
   30%            { transform: translateY(-7px); opacity: 1; }
 }
 
-/* ─── Quick topics ──────────────────────────────────────────────────────────── */
+/* Quick topics (mobile only, hidden on desktop) */
 .ha-quick-topics {
   display: flex;
   gap: 8px;
@@ -261,7 +273,7 @@
 .ha-topic-btn:active:not(:disabled) { transform: scale(0.93); }
 .ha-topic-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* ─── Input bar ─────────────────────────────────────────────────────────────── */
+/* Input bar */
 .ha-input-bar {
   display: flex;
   align-items: center;
@@ -325,3 +337,181 @@
   box-shadow: 0 5px 16px rgba(255,210,77,0.5);
 }
 .ha-send-btn--active:active { transform: scale(0.91); }
+
+/* DESKTOP LAYOUT */
+@media (min-width: 768px) {
+
+  /* Root becomes a row — sidebar + main side by side */
+  .ha-page {
+    flex-direction: row;
+    max-width: 100%;
+    margin: 0;
+    border: none;
+    box-shadow: none;
+  }
+
+  /* Sidebar */
+  .ha-sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 270px;
+    flex-shrink: 0;
+    background: #fff;
+    border-right: 1px solid rgba(204, 34, 34, 0.1);
+    padding: 24px 16px 20px;
+    gap: 24px;
+    overflow-y: auto;
+  }
+  .ha-sidebar::-webkit-scrollbar { width: 3px; }
+  .ha-sidebar::-webkit-scrollbar-thumb { background: #f0dada; border-radius: 4px; }
+
+  /* Brand block */
+  .ha-sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f0dada;
+  }
+  .ha-sidebar-brand-icon {
+    width: 40px;
+    height: 40px;
+    background: #fdf4f4;
+    border: 1.5px solid #f0dada;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .ha-sidebar-brand-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0;
+    letter-spacing: -0.2px;
+  }
+  .ha-sidebar-brand-sub {
+    font-size: 10.5px;
+    color: #aaa;
+    margin: 2px 0 0;
+  }
+
+  /* Section */
+  .ha-sidebar-section { display: flex; flex-direction: column; gap: 8px; }
+  .ha-sidebar-section-title {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #ccc;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .ha-sidebar-chips { display: flex; flex-direction: column; gap: 6px; }
+  .ha-sidebar-chip {
+    background: #fdf4f4;
+    border: 1.5px solid #f0dada;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    color: #1a1a1a;
+    text-align: left;
+    transition: all 0.2s cubic-bezier(0.34, 1.4, 0.64, 1);
+  }
+  .ha-sidebar-chip:hover:not(:disabled) {
+    background: #FFD24D;
+    border-color: #FFD24D;
+    transform: translateX(3px);
+  }
+  .ha-sidebar-chip:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Tips block */
+  .ha-sidebar-tips {
+    background: #fdf4f4;
+    border: 1.5px solid #f0dada;
+    border-radius: 14px;
+    padding: 14px;
+    margin-top: auto;
+  }
+  .ha-sidebar-tips-text {
+    font-size: 11.5px;
+    color: #888;
+    line-height: 1.6;
+    margin: 0;
+  }
+  .ha-sidebar-tips-text strong { color: #CC2222; }
+
+  /* Clear button at bottom of sidebar */
+  .ha-sidebar-clear-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 14px;
+    background: none;
+    border: 1.5px solid #f0dada;
+    border-radius: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #ccc;
+    cursor: pointer;
+    transition: color 0.18s, background 0.18s, border-color 0.18s;
+  }
+  .ha-sidebar-clear-btn:hover { color: #CC2222; background: #fdf4f4; border-color: #f0dada; }
+
+  /* Main panel */
+  .ha-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Hide mobile-only elements */
+  .ha-mobile-only { display: none !important; }
+  .ha-quick-topics { display: none; }
+
+  /* Header adjustments */
+  .ha-header {
+    padding: 16px 28px;
+    box-shadow: 0 2px 12px rgba(204, 34, 34, 0.06);
+  }
+  .ha-header-avatar img,
+  .ha-header-avatar {
+    width: 44px;
+    height: 44px;
+  }
+  .ha-title   { font-size: 16px; }
+  .ha-subtitle { font-size: 11px; }
+
+  /* Body */
+  .ha-body {
+    padding: 24px 28px 16px;
+    gap: 14px;
+  }
+
+  /* Bubbles */
+  .ha-bubble {
+    max-width: 62%;
+    font-size: 14px;
+    padding: 13px 16px;
+  }
+
+  /* Input bar */
+  .ha-input-bar {
+    padding: 12px 28px 20px;
+    gap: 10px;
+  }
+  .ha-input      { font-size: 14px; }
+  .ha-send-btn   { width: 46px; height: 46px; border-radius: 14px; }
+  .ha-avatar     { width: 38px; height: 38px; }
+}
+
+@media (min-width: 1280px) {
+  .ha-sidebar { width: 300px; }
+}

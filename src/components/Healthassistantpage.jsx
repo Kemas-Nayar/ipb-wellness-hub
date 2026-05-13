@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import doctorAvatar from '../assets/doctor_avatar.png';
-import '../styles/HealthAssistantPage.css';
+import '../styles/Healthassistantpage.css';
 
-/* ─── Constants ────────────────────────────────────────────────────────────── */
 const WELCOME = {
   id: 'welcome-message',
   role: 'assistant',
@@ -22,7 +21,6 @@ const QUICK_TOPICS = [
   { label: '💧 Hidrasi',    prompt: 'Berapa banyak air yang harus saya minum setiap hari?' },
 ];
 
-/* ─── SVG Icons ────────────────────────────────────────────────────────────── */
 const IconBack = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="15 18 9 12 15 6" />
@@ -45,7 +43,12 @@ const IconTrash = () => (
   </svg>
 );
 
-/* ─── Sub-components ───────────────────────────────────────────────────────── */
+const IconWellness = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CC2222" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+  </svg>
+);
+
 const TypingIndicator = () => (
   <div className="ha-msg-row ha-msg-ai ha-anim-in">
     <img src={doctorAvatar} className="ha-avatar" alt="Nuri AI" />
@@ -67,7 +70,51 @@ const Message = ({ msg }) => (
   </div>
 );
 
-/* ─── Main Component ───────────────────────────────────────────────────────── */
+const Sidebar = ({ onSend, isLoading, onClear }) => (
+  <aside className="ha-sidebar">
+    {/* Brand */}
+    <div className="ha-sidebar-brand">
+      <div className="ha-sidebar-brand-icon">
+        <IconWellness />
+      </div>
+      <div className="ha-sidebar-brand-text">
+        <h2 className="ha-sidebar-brand-title">IPB Wellness Hub</h2>
+        <p className="ha-sidebar-brand-sub">Health Assistant</p>
+      </div>
+    </div>
+
+    {/* Quick Topics */}
+    <div className="ha-sidebar-section">
+      <p className="ha-sidebar-section-title">Topik Cepat</p>
+      <div className="ha-sidebar-chips">
+        {QUICK_TOPICS.map((t, i) => (
+          <button
+            key={i}
+            className="ha-sidebar-chip"
+            onClick={() => onSend(t.prompt)}
+            disabled={isLoading}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+    </div>
+
+    {/* Tips */}
+    <div className="ha-sidebar-tips">
+      <p className="ha-sidebar-tips-text">
+        💡 <strong>Tips:</strong> Nuri siap menjawab pertanyaan seputar kesehatan, gizi, dan olahraga dalam Bahasa Indonesia.
+      </p>
+    </div>
+
+    {/* Clear button at bottom */}
+    <button className="ha-sidebar-clear-btn" onClick={onClear}>
+      <IconTrash />
+      <span>Hapus Percakapan</span>
+    </button>
+  </aside>
+);
+
 const HealthAssistantPage = ({ onNavigate, user }) => {
   const [messages, setMessages] = useState([WELCOME]);
   const [input, setInput]       = useState('');
@@ -140,82 +187,79 @@ const HealthAssistantPage = ({ onNavigate, user }) => {
 
   return (
     <div className="ha-page">
+      <Sidebar onSend={sendMessage} isLoading={isLoading} onClear={handleClear} />
+      <div className="ha-main">
+        <div className="ha-header">
+          <button className="ha-back-btn" onClick={() => onNavigate('home')} aria-label="Kembali">
+            <IconBack />
+          </button>
 
-      {/* ── Header ── */}
-      <div className="ha-header">
-        <button className="ha-back-btn" onClick={() => onNavigate('home')} aria-label="Kembali">
-          <IconBack />
-        </button>
-
-        <div className="ha-header-avatar">
-          <img src={doctorAvatar} alt="Nuri" />
-          <span className="ha-online-dot" />
-        </div>
-
-        <div className="ha-header-text">
-          <h2 className="ha-title">Health Assistant</h2>
-          <p className="ha-subtitle">Nuri · IPB Wellness Hub</p>
-        </div>
-
-        <button className="ha-clear-btn" onClick={handleClear} aria-label="Hapus percakapan">
-          <IconTrash />
-        </button>
-      </div>
-
-      {/* ── Body ── */}
-      <div className="ha-body">
-
-        {/* Date label */}
-        <div className="ha-date-label">Hari ini</div>
-
-        {/* Messages */}
-        <div className="ha-chat-area">
-          {messages.map(msg => <Message key={msg.id} msg={msg} />)}
-          {isLoading && <TypingIndicator />}
-          <div ref={bottomRef} />
-        </div>
-
-        {/* Quick chips */}
-        {showChips && (
-          <div className="ha-quick-topics">
-            {QUICK_TOPICS.map((t, i) => (
-              <button
-                key={i}
-                className="ha-topic-btn"
-                style={{ animationDelay: `${i * 60}ms` }}
-                onClick={() => sendMessage(t.prompt)}
-                disabled={isLoading}
-              >
-                {t.label}
-              </button>
-            ))}
+          <div className="ha-header-avatar">
+            <img src={doctorAvatar} alt="Nuri" />
+            <span className="ha-online-dot" />
           </div>
-        )}
-      </div>
 
-      {/* ── Input bar ── */}
-      <form className="ha-input-bar" onSubmit={handleSubmit}>
-        <div className={`ha-input-wrap ${input ? 'ha-input-wrap--active' : ''}`}>
-          <input
-            ref={inputRef}
-            className="ha-input"
-            placeholder="Tulis pertanyaanmu..."
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={isLoading}
-            autoComplete="off"
-          />
+          <div className="ha-header-text">
+            <h2 className="ha-title">Health Assistant</h2>
+            <p className="ha-subtitle">Nuri · IPB Wellness Hub</p>
+          </div>
+          <button className="ha-clear-btn ha-mobile-only" onClick={handleClear} aria-label="Hapus percakapan">
+            <IconTrash />
+          </button>
         </div>
-        <button
-          type="submit"
-          className={`ha-send-btn ${input.trim() && !isLoading ? 'ha-send-btn--active' : ''}`}
-          disabled={!input.trim() || isLoading}
-          aria-label="Kirim"
-        >
-          <IconSend disabled={!input.trim() || isLoading} />
-        </button>
-      </form>
+        <div className="ha-body">
+
+          {/* Date label */}
+          <div className="ha-date-label">Hari ini</div>
+
+          {/* Messages */}
+          <div className="ha-chat-area">
+            {messages.map(msg => <Message key={msg.id} msg={msg} />)}
+            {isLoading && <TypingIndicator />}
+            <div ref={bottomRef} />
+          </div>
+
+          {/* Quick chips — mobile only (desktop has sidebar) */}
+          {showChips && (
+            <div className="ha-quick-topics">
+              {QUICK_TOPICS.map((t, i) => (
+                <button
+                  key={i}
+                  className="ha-topic-btn"
+                  style={{ animationDelay: `${i * 60}ms` }}
+                  onClick={() => sendMessage(t.prompt)}
+                  disabled={isLoading}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <form className="ha-input-bar" onSubmit={handleSubmit}>
+          <div className={`ha-input-wrap ${input ? 'ha-input-wrap--active' : ''}`}>
+            <input
+              ref={inputRef}
+              className="ha-input"
+              placeholder="Tulis pertanyaanmu..."
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={isLoading}
+              autoComplete="off"
+            />
+          </div>
+          <button
+            type="submit"
+            className={`ha-send-btn ${input.trim() && !isLoading ? 'ha-send-btn--active' : ''}`}
+            disabled={!input.trim() || isLoading}
+            aria-label="Kirim"
+          >
+            <IconSend disabled={!input.trim() || isLoading} />
+          </button>
+        </form>
+
+      </div>{/* end .ha-main */}
 
     </div>
   );

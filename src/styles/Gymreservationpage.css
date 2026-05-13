@@ -1,8 +1,4 @@
-/* ══════════════════════════════════════════════════════
-   GYM RESERVATION PAGE — 100/100 Design System
-   ══════════════════════════════════════════════════════ */
-
-/* ─── TOKENS ──────────────────────────────────────────── */
+/* TOKENS */
 .gr-page, .gr-conf-page, .gr-succ-page {
   --y:       #FFD24D;
   --y-light: #FFF8DC;
@@ -22,7 +18,7 @@
   --sh-lg:   0 8px 40px rgba(0,0,0,0.12);
 }
 
-/* ─── BASE ────────────────────────────────────────────── */
+/* BASE */
 .gr-page, .gr-conf-page, .gr-succ-page {
   min-height: 100vh;
   background: var(--bg);
@@ -32,7 +28,7 @@
   overflow-x: hidden;
 }
 
-/* ─── TOPBAR ──────────────────────────────────────────── */
+/* TOPBAR */
 .gr-topbar {
   display: flex;
   align-items: center;
@@ -68,7 +64,7 @@
 }
 .gr-ic-btn:hover { background: #F3F4F6; transform: scale(0.96); }
 
-/* ─── SCROLL ──────────────────────────────────────────── */
+/* SCROLL */
 .gr-scroll {
   flex: 1;
   padding: 8px 16px 40px;
@@ -78,9 +74,7 @@
   overflow-y: auto;
 }
 
-/* ══════════════════════════════════════════════
-   CALENDAR
-   ══════════════════════════════════════════════ */
+/* CALENDAR */
 .gr-cal {
   background: var(--white);
   border-radius: 20px;
@@ -177,9 +171,7 @@
   border-radius: 10px;
 }
 
-/* ══════════════════════════════════════════════
-   SESSION
-   ══════════════════════════════════════════════ */
+/* SESSION */
 .gr-sess-section { display: flex; flex-direction: column; gap: 10px; }
 
 .gr-sess-header {
@@ -322,7 +314,7 @@
   color: var(--t1);
 }
 
-/* ─── SKELETON ────────────────────────────────────────── */
+/* SKELETON */
 .gr-skel-list { display: flex; flex-direction: column; gap: 10px; }
 .gr-skel-card {
   background: var(--white);
@@ -347,7 +339,7 @@
   100% { background-position: -200% 0; }
 }
 
-/* ─── ERROR ───────────────────────────────────────────── */
+/* ERROR */
 .gr-error {
   background: #FEF2F2;
   color: #DC2626;
@@ -359,9 +351,7 @@
   line-height: 1.5;
 }
 
-/* ══════════════════════════════════════════════
-   BUTTONS
-   ══════════════════════════════════════════════ */
+/* BUTTONS */
 .gr-btn-primary {
   background: var(--y);
   border: none;
@@ -415,9 +405,7 @@
 }
 @keyframes gr-spin { to { transform: rotate(360deg); } }
 
-/* ══════════════════════════════════════════════
-   CONFIRM PAGE
-   ══════════════════════════════════════════════ */
+/* CONFIRM PAGE */
 .gr-conf-body {
   flex: 1;
   display: flex;
@@ -521,9 +509,7 @@
 .gr-conf-actions .gr-btn-ghost    { flex: 1; padding: 14px; font-size: 14px; }
 .gr-conf-actions .gr-btn-primary  { flex: 1.3; padding: 14px; font-size: 14px; }
 
-/* ══════════════════════════════════════════════
-   SUCCESS PAGE
-   ══════════════════════════════════════════════ */
+/* SUCCESS PAGE */
 .gr-succ-page {
   background: var(--white);
   position: relative;

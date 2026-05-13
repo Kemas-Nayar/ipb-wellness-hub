@@ -1,19 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../supabase';
-import '../styles/GymReservationPage.css';
+import '../styles/Gymreservationpage.css';
 
-// ─── CONSTANTS ───────────────────────────────────────────────────────────────
+// Constants
 const MONTHS    = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MONTHS_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 const DAYS      = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const KAPASITAS = 15;
 
-// Fallback hardcoded slots jika tabel sesi kosong
+
 const FALLBACK_SLOTS = [
-  { id: 'f1', jam_mulai: '16:30:00', jam_selesai: '17:30:00', nama_sesi: 'Sesi Sore 1', terisi: 0, kapasitas_max: 20 },
-  { id: 'f2', jam_mulai: '17:30:00', jam_selesai: '19:00:00', nama_sesi: 'Sesi Sore 2', terisi: 0, kapasitas_max: 20 },
+  { id: 'f1', jam_mulai: '16:30:00', jam_selesai: '17:30:00', nama_sesi: 'Sesi Sore 1', kapasitas_max: KAPASITAS },
+  { id: 'f2', jam_mulai: '17:30:00', jam_selesai: '19:00:00', nama_sesi: 'Sesi Sore 2', kapasitas_max: KAPASITAS },
 ];
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
+// Helpers
 const getDaysInMonth = (y, m) => new Date(y, m + 1, 0).getDate();
 const getFirstDay    = (y, m) => new Date(y, m, 1).getDay();
 const toDateStr      = (y, m, d) => `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
@@ -24,7 +25,7 @@ const fmtDate        = (y, m, d) => {
   return `${['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][date.getDay()]}, ${d} ${MONTHS_ID[m]} ${y}`;
 };
 
-// ─── ICONS ───────────────────────────────────────────────────────────────────
+// Icons
 const IcArrow = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M19 12H5M12 5l-7 7 7 7"/>
@@ -70,7 +71,7 @@ const IcConfetti = () => (
   </svg>
 );
 
-// ─── SKELETON ────────────────────────────────────────────────────────────────
+
 const Skeleton = () => (
   <div className="gr-skel-list">
     {[1,2].map(i => (
@@ -83,7 +84,7 @@ const Skeleton = () => (
   </div>
 );
 
-// ─── CALENDAR ────────────────────────────────────────────────────────────────
+
 const Calendar = ({ year, month, selectedDate, onSelectDate, onPrev, onNext }) => {
   const today       = new Date();
   const daysInMonth = getDaysInMonth(year, month);
@@ -129,7 +130,7 @@ const Calendar = ({ year, month, selectedDate, onSelectDate, onPrev, onNext }) =
   );
 };
 
-// ─── SESSION LIST ────────────────────────────────────────────────────────────
+
 const SessionList = ({ selectedDate, sessions, loading, selectedSession, onSelect }) => {
   if (!selectedDate) return (
     <div className="gr-empty">
@@ -150,7 +151,7 @@ const SessionList = ({ selectedDate, sessions, loading, selectedSession, onSelec
     <div className="gr-sess-list">
       {sessions.map(s => {
         const terisi    = s.terisi ?? 0;
-        const kapasitas = s.kapasitas_max ?? 20;
+        const kapasitas = s.kapasitas_max ?? KAPASITAS;
         const sisa      = kapasitas - terisi;
         const penuh     = sisa <= 0;
         const sel       = selectedSession?.id === s.id;
@@ -183,7 +184,7 @@ const SessionList = ({ selectedDate, sessions, loading, selectedSession, onSelec
   );
 };
 
-// ─── CONFIRM ─────────────────────────────────────────────────────────────────
+
 const ConfirmModal = ({ year, month, selectedDate, selectedSession, loading, error, onConfirm, onCancel }) => (
   <div className="gr-conf-page">
     <div className="gr-topbar">
@@ -194,7 +195,6 @@ const ConfirmModal = ({ year, month, selectedDate, selectedSession, loading, err
 
     <div className="gr-conf-body">
       <div className="gr-conf-card">
-        {/* Header */}
         <div className="gr-conf-head">
           <div className="gr-conf-icon"><IcCal size={26} /></div>
           <div>
@@ -205,7 +205,6 @@ const ConfirmModal = ({ year, month, selectedDate, selectedSession, loading, err
 
         <div className="gr-conf-sep" />
 
-        {/* Detail */}
         <p className="gr-conf-label">Anda akan reservasi pada:</p>
         <div className="gr-conf-detail">
           <div className="gr-conf-detail-icon"><IcCal size={16} /></div>
@@ -220,7 +219,6 @@ const ConfirmModal = ({ year, month, selectedDate, selectedSession, loading, err
 
         <div className="gr-conf-sep" />
 
-        {/* Actions */}
         <div className="gr-conf-actions">
           <button className="gr-btn-ghost" onClick={onCancel} disabled={loading}>Batal</button>
           <button className="gr-btn-primary" onClick={onConfirm} disabled={loading}>
@@ -234,7 +232,7 @@ const ConfirmModal = ({ year, month, selectedDate, selectedSession, loading, err
   </div>
 );
 
-// ─── SUCCESS ─────────────────────────────────────────────────────────────────
+
 const SuccessState = ({ year, month, selectedDate, selectedSession, onNavigate }) => (
   <div className="gr-succ-page">
     <div className="gr-succ-bg" />
@@ -272,7 +270,48 @@ const SuccessState = ({ year, month, selectedDate, selectedSession, onNavigate }
   </div>
 );
 
-// ─── MAIN ────────────────────────────────────────────────────────────────────
+// Fetch sessions with live count
+
+const fetchSessionsWithCount = async (year, month, selDate) => {
+  const dateStr = toDateStr(year, month, selDate);
+
+
+  const { data: sesiData, error: sesiErr } = await supabase
+    .from('sesi')
+    .select('*')
+    .eq('tanggal', dateStr)
+    .order('jam_mulai');
+
+  const baseSessions =
+    sesiErr || !sesiData || sesiData.length === 0
+      ? FALLBACK_SLOTS.map(s => ({
+          ...s,
+          id: `${dateStr}-${s.id}`,
+          tanggal: dateStr,
+          kapasitas_max: KAPASITAS,
+        }))
+      : sesiData.map(s => ({ ...s, kapasitas_max: s.kapasitas_max ?? KAPASITAS }));
+
+
+  const { data: reservasi } = await supabase
+    .from('reservations')
+    .select('start_time')
+    .eq('date', dateStr);
+
+
+  const countMap = {};
+  (reservasi || []).forEach(r => {
+    const key = r.start_time;
+    countMap[key] = (countMap[key] || 0) + 1;
+  });
+
+
+  return baseSessions.map(s => ({
+    ...s,
+    terisi: countMap[s.jam_mulai] || 0,
+  }));
+};
+
 const GymReservationPage = ({ onNavigate, user }) => {
   const today = new Date();
   const [year,    setYear]    = useState(today.getFullYear());
@@ -286,50 +325,72 @@ const GymReservationPage = ({ onNavigate, user }) => {
   const [busy,    setBusy]    = useState(false);
   const [error,   setError]   = useState('');
 
-  // Fetch sessions dari tabel reservations (hardcoded fallback)
-  useEffect(() => {
-    if (!selDate) { setSessions([]); return; }
-    let cancelled = false;
+    const loadSessions = useCallback(async (y, m, d) => {
     setLoadSess(true);
     setSelSess(null);
+    try {
+      const result = await fetchSessionsWithCount(y, m, d);
+      setSessions(result);
+    } catch {
+      setSessions([]);
+    } finally {
+      setLoadSess(false);
+    }
+  }, []);
 
-    // Coba fetch dari tabel 'sesi' dulu, fallback ke hardcoded
-    supabase
-      .from('sesi')
-      .select('*')
-      .eq('tanggal', toDateStr(year, month, selDate))
-      .order('jam_mulai')
-      .then(({ data, error: err }) => {
-        if (cancelled) return;
-        if (err || !data || data.length === 0) {
-          // Fallback: gunakan hardcoded slots dengan id unik per tanggal
-          const dateStr = toDateStr(year, month, selDate);
-          setSessions(FALLBACK_SLOTS.map(s => ({ ...s, id: `${dateStr}-${s.id}`, tanggal: dateStr })));
-        } else {
-          setSessions(data);
+  useEffect(() => {
+    if (!selDate) { setSessions([]); return; }
+    loadSessions(year, month, selDate);
+  }, [selDate, year, month, loadSessions]);
+
+  // Realtime subscription
+  useEffect(() => {
+    if (!selDate) return;
+
+    const dateStr = toDateStr(year, month, selDate);
+
+    const channel = supabase
+      .channel(`reservations-${dateStr}`)
+      .on(
+        'postgres_changes',
+        {
+
+          schema: 'public',
+          table:  'reservations',
+          filter: `date=eq.${dateStr}`,
+        },
+        () => {
+
+          loadSessions(year, month, selDate);
         }
-        setLoadSess(false);
-      });
+      )
+      .subscribe();
 
-    return () => { cancelled = true; };
-  }, [selDate, year, month]);
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [selDate, year, month, loadSessions]);
 
+  // Month navigation
   const prevMonth = () => {
     setSelDate(null); setSelSess(null); setError('');
-    month === 0 ? (setMonth(11), setYear(y => y-1)) : setMonth(m => m-1);
+    if (month === 0) { setMonth(11); setYear(y => y - 1); }
+    else setMonth(m => m - 1);
   };
   const nextMonth = () => {
     setSelDate(null); setSelSess(null); setError('');
-    month === 11 ? (setMonth(0), setYear(y => y+1)) : setMonth(m => m+1);
+    if (month === 11) { setMonth(0); setYear(y => y + 1); }
+    else setMonth(m => m + 1);
   };
 
-  const handleConfirm = async () => {
+    const handleConfirm = async () => {
     if (!selDate || !selSess || !user) return;
     setBusy(true); setError('');
 
     try {
-      // Cek apakah sudah reservasi di tanggal yang sama
       const dateStr = toDateStr(year, month, selDate);
+
+
       const { data: existing } = await supabase
         .from('reservations')
         .select('id')
@@ -339,7 +400,19 @@ const GymReservationPage = ({ onNavigate, user }) => {
 
       if (existing) throw new Error('Kamu sudah memiliki reservasi pada tanggal ini.');
 
-      // Insert ke tabel reservations (skema lama yang bekerja)
+
+      const { count: currentCount } = await supabase
+        .from('reservations')
+        .select('id', { count: 'exact', head: true })
+        .eq('date', dateStr)
+        .eq('start_time', selSess.jam_mulai);
+
+      const kapasitas = selSess.kapasitas_max ?? KAPASITAS;
+      if ((currentCount ?? 0) >= kapasitas) {
+        throw new Error('Maaf, sesi ini baru saja penuh. Silakan pilih sesi lain.');
+      }
+
+
       const { error: err } = await supabase
         .from('reservations')
         .insert({
@@ -365,12 +438,23 @@ const GymReservationPage = ({ onNavigate, user }) => {
     }
   };
 
+  // Render
   if (success) return (
-    <SuccessState year={year} month={month} selectedDate={selDate} selectedSession={selSess} onNavigate={onNavigate} />
+    <SuccessState
+      year={year} month={month}
+      selectedDate={selDate} selectedSession={selSess}
+      onNavigate={onNavigate}
+    />
   );
+
   if (confirm) return (
-    <ConfirmModal year={year} month={month} selectedDate={selDate} selectedSession={selSess}
-      loading={busy} error={error} onConfirm={handleConfirm} onCancel={() => { setConfirm(false); setError(''); }} />
+    <ConfirmModal
+      year={year} month={month}
+      selectedDate={selDate} selectedSession={selSess}
+      loading={busy} error={error}
+      onConfirm={handleConfirm}
+      onCancel={() => { setConfirm(false); setError(''); }}
+    />
   );
 
   return (
@@ -400,13 +484,15 @@ const GymReservationPage = ({ onNavigate, user }) => {
           </div>
           <SessionList
             selectedDate={selDate} sessions={sessions} loading={loadSess}
-            selectedSession={selSess} onSelect={s => { setSelSess(s); setError(''); }}
+            selectedSession={selSess}
+            onSelect={s => { setSelSess(s); setError(''); }}
           />
         </div>
 
         {error && <div className="gr-error">{error}</div>}
 
-        <button className="gr-btn-primary gr-btn-full"
+        <button
+          className="gr-btn-primary gr-btn-full"
           disabled={!selDate || !selSess}
           onClick={() => { setError(''); setConfirm(true); }}>
           Lanjut Reservasi

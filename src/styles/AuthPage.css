@@ -1,9 +1,9 @@
-/* ─── Base ─────────────────────────────────────────── */
+/* Base */
 * {
   font-family: 'Poppins', sans-serif;
 }
 
-/* ─── Page layout ───────────────────────────────────── */
+/*  Page layout  */
 .auth-page {
   min-height: 100vh;
   background: #ffffff;
@@ -25,7 +25,7 @@
   background: linear-gradient(90deg, #C8102E 0%, #E8B800 100%);
 }
 
-/* ─── Header (back + logo) ───────────────────────────── */
+/*  Header (back + logo)  */
 .auth-header {
   display: flex;
   align-items: center;
@@ -60,7 +60,7 @@
   .auth-logo-iwh { height: 44px; }
 }
 
-/* ─── Body ───────────────────────────────────────────── */
+/* Body  */
 .auth-body {
   display: flex;
   flex-direction: column;
@@ -73,7 +73,7 @@
   .auth-body { padding: 32px 24px 48px; gap: 16px; }
 }
 
-/* ─── Heading ────────────────────────────────────────── */
+/*  Heading */
 .auth-heading-group {
   display: flex;
   flex-direction: column;
@@ -104,14 +104,14 @@
   .auth-subtitle { font-size: 13px; }
 }
 
-/* ─── Fields group ───────────────────────────────────── */
+/* Fields group */
 .auth-fields {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-/* ─── Input ──────────────────────────────────────────── */
+/* Input */
 .auth-input {
   width: 100%;
   background: #fafafa;
@@ -150,7 +150,7 @@
   .auth-password-wrapper .auth-input { padding-right: 48px; }
 }
 
-/* ─── Password wrapper ───────────────────────────────── */
+/* Password wrapper */
 .auth-password-wrapper {
   position: relative;
 }
@@ -174,7 +174,7 @@
 
 .auth-eye-btn:hover { color: #555; }
 
-/* ─── Buttons ────────────────────────────────────────── */
+/* Buttons */
 .btn-primary {
   width: 100%;
   background: #C8102E;
@@ -228,7 +228,7 @@
   .btn-google { padding: 14px; font-size: 14px; border-radius: 14px; gap: 12px; }
 }
 
-/* ─── Spinner ─────────────────────────────────────────── */
+/* Spinner */
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -238,7 +238,7 @@
   flex-shrink: 0;
 }
 
-/* ─── Divider ────────────────────────────────────────── */
+/* Divider */
 .auth-divider {
   display: flex;
   align-items: center;
@@ -255,7 +255,7 @@
   border-top: 1px solid #eee;
 }
 
-/* ─── Misc text ──────────────────────────────────────── */
+/* Misc text */
 .auth-forgot {
   text-align: right;
   font-size: 12px;
@@ -302,7 +302,7 @@
 
 .auth-link:hover { text-decoration: underline; }
 
-/* ─── Sent state (reset flow) ────────────────────────── */
+/* Sent state (reset flow) */
 .sent-body  { align-items: center; }
 .sent-icon  {
   display: flex;
@@ -312,7 +312,7 @@
 }
 .sent { width: 120px; height: auto; }
 
-/* ─── Signup success icon ────────────────────────────── */
+/* Signup success icon */
 .signup-success-icon {
   display: flex;
   justify-content: center;

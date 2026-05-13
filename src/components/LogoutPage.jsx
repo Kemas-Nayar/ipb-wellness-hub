@@ -8,8 +8,6 @@ const LogoutPage = ({ onNavigate }) => {
   const handleLogout = async () => {
     setLoading(true);
     await supabase.auth.signOut();
-    // onAuthStateChange di App.jsx akan handle redirect ke 'landing'
-    // tapi tambahkan fallback manual jika tidak trigger
     setLoading(false);
     onNavigate('landing');
   };

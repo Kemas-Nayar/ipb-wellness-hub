@@ -2,14 +2,13 @@ import React, { useRef, useEffect, useCallback } from 'react';
 
 const ITEM_HEIGHT = 44;
 const VISIBLE_ITEMS = 5;
-const PADDING = ITEM_HEIGHT * Math.floor(VISIBLE_ITEMS / 2); // 88px
+const PADDING = ITEM_HEIGHT * Math.floor(VISIBLE_ITEMS / 2);
 
 const PickerColumn = ({ items, selectedIndex, onSelect }) => {
   const columnRef = useRef(null);
   const scrollTimer = useRef(null);
   const currentIndex = useRef(selectedIndex);
 
-  // Set posisi awal saat mount
   useEffect(() => {
     const el = columnRef.current;
     if (!el) return;
@@ -25,7 +24,6 @@ const PickerColumn = ({ items, selectedIndex, onSelect }) => {
     if (scrollTimer.current) clearTimeout(scrollTimer.current);
 
     scrollTimer.current = setTimeout(() => {
-      // scrollTop langsung = index * ITEM_HEIGHT karena padding pakai div terpisah
       const rawIndex = el.scrollTop / ITEM_HEIGHT;
       const snapped = Math.round(rawIndex);
       const clamped = Math.max(0, Math.min(snapped, items.length - 1));
@@ -57,7 +55,6 @@ const PickerColumn = ({ items, selectedIndex, onSelect }) => {
         className="picker-column"
         onScroll={handleScroll}
       >
-        {/* Spacer atas — sama persis dengan PADDING */}
         <div style={{ height: PADDING, flexShrink: 0 }} />
 
         {items.map((item, index) => (
@@ -87,7 +84,6 @@ const DatePicker = ({ value, onCancel, onDone }) => {
   const days  = Array.from({ length: 31 }, (_, i) => String(i + 1));
   const years = Array.from({ length: 56 }, (_, i) => String(1970 + i));
 
-  // Hitung default index dari value
   const defaultDate  = value instanceof Date && !isNaN(value) ? value : new Date(2000, 0, 1);
   const initDay      = defaultDate.getDate() - 1;
   const initMonth    = defaultDate.getMonth();
@@ -103,7 +99,6 @@ const DatePicker = ({ value, onCancel, onDone }) => {
     const month = selectedMonth.current;
     const year  = parseInt(years[selectedYear.current]);
 
-    // Clamping hari agar tidak melebihi hari max di bulan tsb
     const maxDay  = new Date(year, month + 1, 0).getDate();
     const safeDay = Math.min(day, maxDay);
 

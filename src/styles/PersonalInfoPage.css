@@ -5,7 +5,7 @@
   font-family: 'Poppins', sans-serif;
 }
 
-/* ── Loading screen ── */
+/* Loading screen */
 .pi-loading-screen {
   display: flex;
   flex-direction: column;
@@ -27,7 +27,7 @@
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── Banners ── */
+/* Banners */
 .pi-banner {
   display: flex;
   align-items: center;
@@ -51,7 +51,7 @@
 }
 .pi-banner-error svg { stroke: #c62828; }
 
-/* ── Header button styles ── */
+/* Header button styles */
 /* edit-label needs flex to align SVG + text */
 .edit-label {
   display: inline-flex;
@@ -70,7 +70,7 @@
   display: inline-block;
 }
 
-/* ── Avatar Section ── */
+/* Avatar Section */
 .pi-avatar-section {
   display: flex;
   flex-direction: column;
@@ -154,7 +154,7 @@
   margin: 0;
 }
 
-/* ── Form ── */
+/* Form */
 .pi-form {
   padding: 16px 16px 0;
 }
@@ -201,7 +201,7 @@
   gap: 8px;
 }
 
-/* Icon wrapper — centers SVG and prevents size variation */
+/* Icon wrapper  */
 .pi-input-icon {
   display: flex;
   align-items: center;
@@ -224,7 +224,7 @@
 
 .pi-input:disabled {
   color: #555;
-  -webkit-text-fill-color: #555; /* iOS fix for disabled input color */
+  -webkit-text-fill-color: #555; 
 }
 
 .pi-input::placeholder {
@@ -243,7 +243,7 @@ select.pi-input {
   gap: 16px;
 }
 
-/* ── BMI Card ── */
+/* BMI Card */
 .pi-bmi-card {
   display: flex;
   align-items: center;
@@ -278,7 +278,7 @@ select.pi-input {
   display: inline-block;
 }
 
-/* ── Footer action buttons ── */
+/* Footer action buttons */
 .pi-footer {
   margin-top: 8px;
   display: flex;

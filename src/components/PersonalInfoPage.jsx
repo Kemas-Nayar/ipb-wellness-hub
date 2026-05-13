@@ -3,7 +3,7 @@ import { supabase } from '../supabase';
 import '../styles/SubPage.css';
 import '../styles/PersonalInfoPage.css';
 
-// ===== SVG ICONS =====
+// SVG Icons
 const IconUser = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
@@ -93,7 +93,7 @@ const IconWarning = () => (
   </svg>
 );
 
-// ===== COMPONENT =====
+
 const PersonalInfoPage = ({ onNavigate, user }) => {
   const [isEdit, setIsEdit] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -269,7 +269,7 @@ const PersonalInfoPage = ({ onNavigate, user }) => {
   const avatarInitial = form.namaLengkap.charAt(0).toUpperCase()
     || user?.email?.charAt(0).toUpperCase() || 'U';
 
-  // Field definitions — icon is now a React component, no emojis
+
   const identityFields = [
     { label: 'Nama Lengkap',   key: 'namaLengkap',  type: 'text',  placeholder: 'Nama Lengkap',  Icon: IconUser },
     { label: 'Alamat E-Mail',  key: 'email',         type: 'email', placeholder: 'Email',          Icon: IconMail },
@@ -289,7 +289,7 @@ const PersonalInfoPage = ({ onNavigate, user }) => {
   return (
     <div className="subpage pi-page">
 
-      {/* Header */}
+
       <div className="subpage-header">
         <button
           className="subpage-back"
@@ -314,7 +314,7 @@ const PersonalInfoPage = ({ onNavigate, user }) => {
         </button>
       </div>
 
-      {/* Banners */}
+
       {saveSuccess && (
         <div className="pi-banner pi-banner-success">
           <IconSuccess /> Data berhasil disimpan!
@@ -326,7 +326,7 @@ const PersonalInfoPage = ({ onNavigate, user }) => {
         </div>
       )}
 
-      {/* Avatar Section */}
+
       <div className="pi-avatar-section">
         <div className="pi-avatar-wrap" onClick={handlePhotoClick}>
           {avatarUrl ? (
@@ -357,10 +357,10 @@ const PersonalInfoPage = ({ onNavigate, user }) => {
         <p className="pi-avatar-email">{form.email}</p>
       </div>
 
-      {/* Form */}
+
       <div className="pi-form">
 
-        {/* Section: Identitas */}
+
         <div className="pi-section-label">Identitas</div>
         <div className="pi-card">
           {identityFields.map(({ label, key, type, placeholder, Icon }) => (
@@ -380,7 +380,7 @@ const PersonalInfoPage = ({ onNavigate, user }) => {
             </div>
           ))}
 
-          {/* Gender */}
+
           <div className="pi-field">
             <label className="pi-field-label">Jenis Kelamin</label>
             <div className="pi-input-wrap">
@@ -408,7 +408,7 @@ const PersonalInfoPage = ({ onNavigate, user }) => {
           </div>
         </div>
 
-        {/* Section: Fisik */}
+
         <div className="pi-section-label">Data Fisik</div>
         <div className="pi-card">
           <div className="pi-row">
@@ -444,7 +444,7 @@ const PersonalInfoPage = ({ onNavigate, user }) => {
             </div>
           </div>
 
-          {/* BMI Result */}
+
           {bmi && (() => {
             const info = getBmiInfo(bmi);
             return (
@@ -480,7 +480,7 @@ const PersonalInfoPage = ({ onNavigate, user }) => {
           })()}
         </div>
 
-        {/* Footer buttons saat edit */}
+
         {isEdit && (
           <div className="pi-footer">
             <button className="pi-btn-save" onClick={handleSave} disabled={isLoading}>

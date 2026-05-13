@@ -1,4 +1,4 @@
-/* ===== BASE ===== */
+/* BASE  */
 .ls-screen {
   position: fixed;
   inset: 0;
@@ -25,7 +25,7 @@
   pointer-events: none;
 }
 
-/* ===== BACKGROUND ORBS ===== */
+/*  BACKGROUND ORBS */
 .ls-orb {
   position: absolute;
   border-radius: 50%;
@@ -70,7 +70,7 @@
   66%       { transform: translate(-15px, 20px) scale(0.95); }
 }
 
-/* ===== PARTICLES ===== */
+/* PARTICLES */
 .ls-particle {
   position: absolute;
   width: 2px;
@@ -101,7 +101,7 @@
   100% { transform: translateY(-60px) translateX(20px); opacity: 0; }
 }
 
-/* ===== GLASS CONTAINER ===== */
+/* GLASS CONTAINER */
 .ls-glass {
   position: relative;
   width: 180px;
@@ -131,7 +131,7 @@
   }
 }
 
-/* ===== AMBIENT GLOW ===== */
+/* AMBIENT GLOW */
 .ls-glow {
   position: absolute;
   width: 240px;
@@ -148,7 +148,7 @@
   50%       { transform: scale(1.15); opacity: 1;   }
 }
 
-/* ===== ROTATING RING ===== */
+/*  ROTATING RING  */
 .ls-ring-outer {
   position: absolute;
   inset: -14px;
@@ -190,7 +190,7 @@
   to   { transform: rotate(-360deg); }
 }
 
-/* ===== LOGO ===== */
+/* LOGO */
 .ls-logo-wrap {
   position: relative;
   z-index: 2;
@@ -223,7 +223,7 @@
   50%       { transform: scale(1.04); filter: drop-shadow(0 0 28px rgba(200,16,46,0.6)); }
 }
 
-/* ===== TEXT ===== */
+/*  TEXT  */
 .ls-brand {
   margin-top: 28px;
   font-family: 'Poppins', sans-serif;
@@ -276,7 +276,7 @@
   100% { background-position: 200% center; }
 }
 
-/* ===== PROGRESS BAR ===== */
+/*  PROGRESS BAR  */
 .ls-progress-track {
   position: absolute;
   bottom: 48px;
@@ -310,7 +310,7 @@
   transition: left 0.1s linear;
 }
 
-/* ===== RESPONSIVE ===== */
+/*  RESPONSIVE */
 @media (min-width: 480px) {
   .ls-glass  { width: 200px; height: 200px; }
   .ls-logo   { width: 130px; height: 130px; }

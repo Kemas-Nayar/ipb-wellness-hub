@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
 import { supabase } from '../supabase';
-import imgTubuhAtas from '../assets/Latihan_Tubuh_Bagian_Atas.png';
+import imgTubuhAtas  from '../assets/Latihan_Tubuh_Bagian_Atas.png';
 import imgTubuhBawah from '../assets/Latihan_Tubuh_Bagian_Bawah.png';
-import imgKardio from '../assets/Latihan_Kardio.png';
-import imgInti from '../assets/Latihan_Inti.png';
-import imgFullBody from '../assets/Full_Body_Strength.png';
-import '../styles/HealthModulePage.css';
+import imgKardio     from '../assets/Latihan_Kardio.png';
+import imgInti       from '../assets/Latihan_Inti.png';
+import imgFullBody   from '../assets/Full_Body_Strength.png';
+import '../styles/Healthmodulepage.css';
 
 const CATEGORIES = [
   {
@@ -16,9 +16,9 @@ const CATEGORIES = [
     desc: 'Build strength and tone your entire body with this effective workout',
     img: imgTubuhAtas,
     videos: [
-      { id: 'dQw4w9WgXcQ', title: 'Upper Body Warm Up', week: 1 },
-      { id: 'IODxDxX7oi4', title: 'Shoulder Press & Rows', week: 1 },
-      { id: 'vc1E5CfRfos', title: 'Push & Pull Superset', week: 2 },
+      { id: 'bzsDThZUqyI', title: 'Upper Body Warm Up',     week: 1 },
+      { id: 'qEwKCR5JCog', title: 'Shoulder Press & Rows',  week: 1 },
+      { id: '_owjFN4IiWM', title: 'Push & Pull Superset',   week: 2 },
     ],
   },
   {
@@ -29,9 +29,9 @@ const CATEGORIES = [
     desc: 'Build strength and tone your entire body with this effective workout',
     img: imgTubuhBawah,
     videos: [
-      { id: 'aclHkVaku9U', title: 'Squat Fundamentals', week: 1 },
-      { id: 'nhoikoUEI8U', title: 'Leg Press & Lunges', week: 1 },
-      { id: 'kiBSwWordFE', title: 'Hamstring Focus', week: 2 },
+      { id: 'gf3Vd4LVymk', title: 'Squat Fundamentals',           week: 1 },
+      { id: '3Vdqz_wzT1I', title: 'Squats, Lunges & Leg Press',   week: 1 },
+      { id: 'lVV3aEijelY', title: 'Hamstring Focus',              week: 2 },
     ],
   },
   {
@@ -42,8 +42,8 @@ const CATEGORIES = [
     desc: 'Build strength and tone your entire body with this effective workout',
     img: imgKardio,
     videos: [
-      { id: 'ml6cT4AZdqI', title: 'HIIT Cardio Blast', week: 1 },
-      { id: 'M0uO8X3_tEA', title: 'Treadmill Interval', week: 1 },
+      { id: 'ml6cT4AZdqI', title: 'HIIT Cardio Blast',   week: 1 },
+      { id: 'uNKbVlGstWY', title: 'Treadmill Interval',  week: 1 },
     ],
   },
   {
@@ -54,39 +54,29 @@ const CATEGORIES = [
     desc: 'Build strength and tone your entire body with this effective workout',
     img: imgInti,
     videos: [
-      { id: 'DHD1-2P4Hm0', title: 'Core Stability Basics', week: 1 },
-      { id: 'AnYl6Mv5pwo', title: 'Plank Variations', week: 1 },
+      { id: 'b_TTLmmQmXU', title: 'Core Stability Basics', week: 1 },
+      { id: 'z_xEzYVCqWk', title: 'Plank Variations',      week: 1 },
     ],
   },
 ];
 
 const TODAY_WORKOUT = {
-  id: 'full-body',
-  title: 'Latihan Kekuatan Tubuh',
-  level: 'Intermediate',
+  id:       'full-body',
+  title:    'Latihan Kekuatan Tubuh',
+  level:    'Intermediate',
   duration: '30 Min',
-  desc: 'Build strength and tone your entire body with this effective workout',
-  img: imgFullBody,
-  videoId: 'vc1E5CfRfos',
+  desc:     'Build strength and tone your entire body with this effective workout',
+  img:      imgFullBody,
+  videoId:  '36BuhRO3zng',
 };
 
-const WEEKLY_TARGET = 5;
-const ALL_VIDEOS = CATEGORIES.flatMap(c => c.videos);
-const TOTAL_VIDEOS = ALL_VIDEOS.length;
+const ALL_VIDEOS   = CATEGORIES.flatMap(c => c.videos);
+const TOTAL_VIDEOS = ALL_VIDEOS.length; // 10 total
 
 const padTwo = (n) => String(n).padStart(2, '0');
 
-const loadProgress = () => {
-  try { return JSON.parse(localStorage.getItem('hm_progress') || '{}'); }
-  catch { return {}; }
-};
-
-const saveProgress = (data) => {
-  localStorage.setItem('hm_progress', JSON.stringify(data));
-};
-
 const getWeekStart = () => {
-  const d = new Date();
+  const d   = new Date();
   const day = d.getDay();
   const diff = d.getDate() - day + (day === 0 ? -6 : 1);
   const mon = new Date(d);
@@ -94,190 +84,319 @@ const getWeekStart = () => {
   return mon.toISOString().split('T')[0];
 };
 
-// ─── VIDEO PLAYER ─────────────────────────────────────────────────────────────
-const VideoPlayer = ({ videoId, onClose, onMarkComplete }) => (
-  <div className="hm-video-overlay" onClick={onClose}>
-    <div className="hm-video-container" onClick={e => e.stopPropagation()}>
-      <button className="hm-video-close" onClick={onClose}>✕</button>
-      <iframe
-        src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-        className="hm-iframe"
-        title="workout video"
-      />
-      <button
-        onClick={onMarkComplete}
-        style={{
-          position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)',
-          background: '#27AE60', color: 'white', border: 'none', borderRadius: 20,
-          padding: '10px 24px', fontWeight: '700', fontSize: 13, cursor: 'pointer',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.3)', zIndex: 10,
-          fontFamily: "'Poppins', sans-serif",
-          whiteSpace: 'nowrap',
-        }}
-      >
-        ✓ Tandai Selesai
-      </button>
+const STORAGE_KEY = 'hm_progress';
+
+const loadLocalProgress = () => {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+  catch { return {}; }
+};
+
+const saveLocalProgress = (data) => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+};
+
+const LazyImg = memo(({ src, alt, className }) => {
+  const imgRef = useRef(null);
+
+  useEffect(() => {
+    const el = imgRef.current;
+    if (!el) return;
+    if (el.complete) {
+      el.classList.add('loaded');
+      return;
+    }
+    const handler = () => el.classList.add('loaded');
+    el.addEventListener('load', handler);
+    return () => el.removeEventListener('load', handler);
+  }, []);
+
+  return (
+    <img
+      ref={imgRef}
+      src={src}
+      alt={alt}
+      className={className}
+      loading="lazy"
+      decoding="async"
+    />
+  );
+});
+
+const VideoPlayer = memo(({ videoId, onClose, onMarkComplete }) => {
+  const [playing, setPlaying] = useState(false);
+
+  // Reset state jika videoId berubah
+  useEffect(() => { setPlaying(false); }, [videoId]);
+
+  const thumbUrl = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+
+  return (
+    <div className="hm-video-overlay" onClick={onClose}>
+      <div className="hm-video-wrapper" onClick={e => e.stopPropagation()}>
+        <div className="hm-video-container">
+          <button className="hm-video-close" onClick={onClose}>✕</button>
+
+          {playing ? (
+            <iframe
+              src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="hm-iframe"
+              title="workout video"
+            />
+          ) : (
+            <div className="hm-yt-facade" onClick={() => setPlaying(true)}>
+              <img src={thumbUrl} alt="video thumbnail" />
+              <div className="hm-yt-play-btn">▶</div>
+            </div>
+          )}
+        </div>
+
+        <button className="hm-mark-complete-btn" onClick={onMarkComplete}>
+          ✓ Tandai Selesai
+        </button>
+      </div>
     </div>
+  );
+});
+
+const SkeletonLoading = () => (
+  <div className="hm-loading">
+    <div className="hm-skeleton hm-skeleton-header" />
+    <div className="hm-skeleton hm-skeleton-stats" />
+    <div className="hm-skeleton hm-skeleton-card" />
+    <div className="hm-skeleton hm-skeleton-card" />
+    <div className="hm-skeleton hm-skeleton-card" />
   </div>
 );
 
-// ─── VIDEO CARD ───────────────────────────────────────────────────────────────
-const VideoCard = ({ cat, onWatch, progress }) => {
-  const completedVideos = cat.videos?.filter(v => (progress?.[v.id]?.progress || 0) >= 90).length || 0;
-  const totalVideos = cat.videos?.length || 0;
+const VideoCard = memo(({ cat, onWatch, progress }) => {
+  const { completedVideos, totalVideos, allDone, pct } = useMemo(() => {
+    const total     = cat.videos?.length || 0;
+    const completed = cat.videos?.filter(v => (progress?.[v.id]?.progress || 0) >= 90).length || 0;
+    return {
+      completedVideos: completed,
+      totalVideos: total,
+      allDone: completed === total && total > 0,
+      pct: total > 0 ? Math.round((completed / total) * 100) : 0,
+    };
+  }, [cat.videos, progress]);
+
+  const handleWatch = useCallback(() => onWatch(cat), [cat, onWatch]);
+  const handleWatchBtn = useCallback((e) => { e.stopPropagation(); onWatch(cat); }, [cat, onWatch]);
+
   return (
-    <div className="hm-video-card" onClick={() => onWatch(cat)}>
+    <div className="hm-video-card" onClick={handleWatch}>
       <div className="hm-video-thumb">
-        <img src={cat.img} alt={cat.title} />
+        <LazyImg src={cat.img} alt={cat.title} />
         <div className="hm-play-btn">▶</div>
-        {completedVideos === totalVideos && totalVideos > 0 && (
-          <div className="hm-completed-badge">✓ Selesai</div>
-        )}
+        {allDone && <div className="hm-completed-badge">✓ Selesai</div>}
       </div>
       <div className="hm-video-info">
         <h4 className="hm-video-title">{cat.title}</h4>
         <p className="hm-video-meta">{totalVideos} video · {cat.level}</p>
-        <button className="hm-tonton-btn" onClick={e => { e.stopPropagation(); onWatch(cat); }}>Tonton</button>
+        <div className="hm-card-progress">
+          <div className="hm-card-progress-fill" style={{ width: `${pct}%` }} />
+        </div>
+        <button className="hm-tonton-btn" onClick={handleWatchBtn}>
+          {allDone ? '▶ Tonton Lagi' : 'Tonton'}
+        </button>
       </div>
     </div>
   );
-};
+});
 
-// ─── DETAIL PAGE ─────────────────────────────────────────────────────────────
-const DetailPage = ({ category, onBack, progress, onWatchVideo }) => {
-  const others = CATEGORIES.filter(c => c.id !== category.id);
+const DetailPage = memo(({ category, onBack, onOpenDetail, progress, onWatchVideo }) => {
+  const others = useMemo(() => CATEGORIES.filter(c => c.id !== category.id), [category.id]);
+
   return (
     <div className="hm-detail-page">
       <div className="hm-detail-header">
-        <button className="hm-back-btn" onClick={onBack}>←</button>
+        <button className="hm-back-btn" onClick={onBack} aria-label="Kembali" />
       </div>
       <div className="hm-detail-info">
         <h2 className="hm-detail-title">{category.title}</h2>
         <p className="hm-detail-desc">{category.desc}</p>
         <p className="hm-detail-level">{category.level} · {category.duration}</p>
       </div>
-      <div className="hm-detail-hero" onClick={() => category.videos[0] && onWatchVideo(category.videos[0].id)}>
-        <img src={category.img} alt={category.title} className="hm-detail-hero-img" />
+
+      <div
+        className="hm-detail-hero"
+        onClick={() => category.videos[0] && onWatchVideo(category.videos[0].id)}
+      >
+        <LazyImg src={category.img} alt={category.title} className="hm-detail-hero-img" />
         <div className="hm-detail-play">▶</div>
       </div>
+
       <div className="hm-detail-body">
-        {/* Video list for this category */}
         <h3 className="hm-section-title">Video dalam Modul Ini</h3>
+
         {category.videos.map(v => {
-          const pct = progress?.[v.id]?.progress || 0;
+          const pct  = progress?.[v.id]?.progress || 0;
           const done = pct >= 90;
           return (
-            <div key={v.id} style={{
-              display: 'flex', alignItems: 'center', gap: 12,
-              padding: '10px 0', borderBottom: '1px solid #f0f0f0', cursor: 'pointer'
-            }} onClick={() => onWatchVideo(v.id)}>
-              <div style={{
-                width: 36, height: 36, borderRadius: '50%',
-                background: done ? '#e8f5e9' : '#f5f5f5',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 14, flexShrink: 0
-              }}>
+            <div key={v.id} className="hm-detail-video-row" onClick={() => onWatchVideo(v.id)}>
+              <div className={`hm-detail-video-icon ${done ? 'done' : ''}`}>
                 {done ? '✓' : '▶'}
               </div>
-              <div style={{ flex: 1 }}>
-                <p style={{ margin: 0, fontSize: 13, fontWeight: '600', color: '#333' }}>{v.title}</p>
-                <p style={{ margin: '2px 0 0', fontSize: 11, color: '#aaa' }}>Minggu {v.week}</p>
+              <div className="hm-detail-video-text">
+                <p className="hm-detail-video-title">{v.title}</p>
+                <p className="hm-detail-video-week">Minggu {v.week}</p>
               </div>
-              {done && <span style={{ fontSize: 11, color: '#4caf50', fontWeight: '600' }}>Selesai</span>}
+              <div className="hm-detail-video-right">
+                {done
+                  ? <span className="hm-done-label">Selesai</span>
+                  : pct > 0
+                    ? <span className="hm-progress-label">{pct}%</span>
+                    : null}
+              </div>
             </div>
           );
         })}
 
-        <h3 className="hm-section-title" style={{ marginTop: 24 }}>Video Lainnya</h3>
+        <h3 className="hm-section-title hm-section-title--top">Video Lainnya</h3>
         {others.map(cat => (
-          <VideoCard key={cat.id} cat={cat} onWatch={() => onWatchVideo(cat.videos[0]?.id)} progress={progress} />
+          <VideoCard
+            key={cat.id}
+            cat={cat}
+            onWatch={() => onOpenDetail(cat)}
+            progress={progress}
+          />
         ))}
       </div>
     </div>
   );
-};
+});
 
-// ─── MAIN COMPONENT ──────────────────────────────────────────────────────────
+// Cache Supabase hasil fetch (session-level, bukan per-render)
+let cachedReservations = null;
+let cachedProgressData = null;
+
 const HealthModulePage = ({ onNavigate, user }) => {
-  const [reservationCount, setReservationCount] = useState(0);
-  const [progress, setProgress] = useState(loadProgress);
+  const [reservationCount, setReservationCount] = useState({ total: 0, thisWeek: 0 });
+  const [progress, setProgress]     = useState(loadLocalProgress);
   const [activeDetail, setActiveDetail] = useState(null);
-  const [activeVideo, setActiveVideo] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [activeVideo, setActiveVideo]   = useState(null);
+  const [loading, setLoading]           = useState(true);
 
   useEffect(() => {
-    if (!user) { setLoading(false); return; }
-    const fetchReservations = async () => {
-      // Use correct table 'reservasi' and join sesi for date
-      const weekStart = getWeekStart();
-      const { data } = await supabase
-        .from('reservasi')
-        .select('id, sesi:sesi_id(tanggal)')
-        .eq('pengguna_id', user.id)
-        .in('status', ['dikonfirmasi', 'hadir', 'selesai']);
+    if (!user) {
+      setProgress(loadLocalProgress());
+      setLoading(false);
+      return;
+    }
 
-      if (data) {
-        const thisWeek = data.filter(r => r.sesi?.tanggal >= weekStart);
-        setReservationCount({ total: data.length, thisWeek: thisWeek.length });
+    const fetchAll = async () => {
+      const weekStart = getWeekStart();
+
+            if (!cachedReservations) {
+        const { data } = await supabase
+          .from('reservations')
+          .select('id, date')
+          .eq('user_id', user.id);
+        cachedReservations = data || [];
       }
+      const thisWeek = cachedReservations.filter(r => r.date && r.date >= weekStart);
+      setReservationCount({ total: cachedReservations.length, thisWeek: thisWeek.length });
+
+            if (!cachedProgressData) {
+        const { data, error } = await supabase
+          .from('user_video_progress')
+          .select('video_id, progress, last_watched')
+          .eq('pengguna_id', user.id);
+
+        if (!error) cachedProgressData = data || [];
+      }
+
+      if (cachedProgressData !== null) {
+        const progressMap = {};
+        cachedProgressData.forEach(row => {
+          progressMap[row.video_id] = { progress: row.progress, lastWatched: row.last_watched };
+        });
+        setProgress(progressMap);
+        saveLocalProgress(progressMap);
+      }
+
       setLoading(false);
     };
-    fetchReservations();
+
+    fetchAll();
   }, [user]);
 
-  const completedCount = ALL_VIDEOS.filter(v => (progress[v.id]?.progress || 0) >= 90).length;
-  const weeklyDone = reservationCount.thisWeek || 0;
-  const weeklyLeft = Math.max(0, WEEKLY_TARGET - weeklyDone);
-  const weeklyPct = Math.min(100, Math.round((weeklyDone / WEEKLY_TARGET) * 100));
+  // Derived stats — useMemo agar tidak dihitung ulang setiap render
+  const { completedCount, videoPct, videoLeft, todayDone } = useMemo(() => {
+    const completed = ALL_VIDEOS.filter(v => (progress[v.id]?.progress || 0) >= 90).length;
+    return {
+      completedCount: completed,
+      videoPct: Math.round((completed / TOTAL_VIDEOS) * 100),
+      videoLeft: TOTAL_VIDEOS - completed,
+      todayDone: (progress[TODAY_WORKOUT.videoId]?.progress || 0) >= 90,
+    };
+  }, [progress]);
 
-  const handleWatchVideo = (videoId) => {
+    const handleWatchVideo = useCallback((videoId) => {
     if (!videoId) return;
     setActiveVideo(videoId);
-  };
+  }, []);
 
-  const handleVideoClose = () => {
-    if (activeVideo) {
-      // Mark as partially watched (50%) if not already completed
-      const current = progress[activeVideo]?.progress || 0;
-      if (current < 90) {
-        const updated = {
-          ...progress,
-          [activeVideo]: {
-            progress: Math.max(current, 50),
-            lastWatched: Date.now()
-          }
-        };
-        setProgress(updated);
-        saveProgress(updated);
+  const handleVideoClose = useCallback(async () => {
+    if (!activeVideo) return;
+    const current = progress[activeVideo]?.progress || 0;
+    if (current < 90) {
+      const newProgress = Math.max(current, 10);
+      const updated = {
+        ...progress,
+        [activeVideo]: { progress: newProgress, lastWatched: Date.now() },
+      };
+      setProgress(updated);
+      saveLocalProgress(updated);
+      cachedProgressData = null; // invalidate cache
+
+      if (user) {
+        await supabase.from('user_video_progress').upsert({
+          pengguna_id: user.id,
+          video_id:    activeVideo,
+          progress:    newProgress,
+          last_watched: new Date().toISOString(),
+        }, { onConflict: 'pengguna_id,video_id' });
       }
     }
     setActiveVideo(null);
-  };
+  }, [activeVideo, progress, user]);
 
-  const handleMarkComplete = () => {
+  const handleMarkComplete = useCallback(async () => {
     if (!activeVideo) return;
     const updated = {
       ...progress,
-      [activeVideo]: {
-        progress: 100,
-        lastWatched: Date.now()
-      }
+      [activeVideo]: { progress: 100, lastWatched: Date.now() },
     };
     setProgress(updated);
-    saveProgress(updated);
-    setActiveVideo(null);
-  };
+    saveLocalProgress(updated);
+    cachedProgressData = null; // invalidate cache
 
-  if (loading) return <div className="hm-loading">Loading...</div>;
+    if (user) {
+      await supabase.from('user_video_progress').upsert({
+        pengguna_id: user.id,
+        video_id:    activeVideo,
+        progress:    100,
+        last_watched: new Date().toISOString(),
+      }, { onConflict: 'pengguna_id,video_id' });
+    }
+    setActiveVideo(null);
+  }, [activeVideo, progress, user]);
+
+  const handleOpenDetail = useCallback((cat) => setActiveDetail(cat), []);
+  const handleBackDetail  = useCallback(() => setActiveDetail(null), []);
+
+    if (loading) return <SkeletonLoading />;
 
   if (activeDetail) {
     return (
       <>
         <DetailPage
           category={activeDetail}
-          onBack={() => setActiveDetail(null)}
+          onBack={handleBackDetail}
+          onOpenDetail={handleOpenDetail}
           progress={progress}
           onWatchVideo={handleWatchVideo}
         />
@@ -295,7 +414,7 @@ const HealthModulePage = ({ onNavigate, user }) => {
   return (
     <div className="hm-page">
       <div className="hm-header">
-        <button className="hm-back-btn" onClick={() => onNavigate('home')}>←</button>
+        <button className="hm-back-btn" onClick={() => onNavigate('home')} aria-label="Kembali" />
         <div className="hm-header-text">
           <h2 className="hm-title">Modul Latihan</h2>
           <p className="hm-subtitle">Stay Active, Stay Healthy!</p>
@@ -304,45 +423,44 @@ const HealthModulePage = ({ onNavigate, user }) => {
       </div>
 
       <div className="hm-body">
-        {/* Stats Card */}
         <div className="hm-stats-card">
           <div className="hm-stats-row">
             <div className="hm-stat hm-stat-red">
               <span className="hm-stat-icon">🔥</span>
               <div>
                 <p className="hm-stat-label">Total Gym</p>
-                <p className="hm-stat-value">{padTwo(reservationCount.total || 0)} sesi</p>
+                <p className="hm-stat-value">{padTwo(reservationCount.total)} sesi</p>
               </div>
             </div>
             <div className="hm-stat hm-stat-blue">
               <span className="hm-stat-icon">📅</span>
               <div>
                 <p className="hm-stat-label">Minggu Ini</p>
-                <p className="hm-stat-value">{padTwo(weeklyDone)} sesi</p>
+                <p className="hm-stat-value">{padTwo(reservationCount.thisWeek)} sesi</p>
               </div>
             </div>
             <div className="hm-stat hm-stat-yellow">
-              <span className="hm-stat-icon">🏋️</span>
+              <span className="hm-stat-icon">🎬</span>
               <div>
-                <p className="hm-stat-label-sm">Modul<br/>Selesai</p>
+                <p className="hm-stat-label-sm">Video Selesai</p>
                 <p className="hm-stat-value">{completedCount}/{TOTAL_VIDEOS}</p>
               </div>
             </div>
           </div>
-          {/* Weekly Goal */}
+
           <div className="hm-weekly">
             <div className="hm-weekly-row">
-              <span className="hm-weekly-label">Weekly Goal</span>
-              <span className="hm-weekly-left">{weeklyLeft} workouts left</span>
+              <span className="hm-weekly-label">Progress Modul</span>
+              <span className="hm-weekly-left">
+                {videoLeft > 0 ? `${videoLeft} video lagi` : 'Semua selesai! 🎉'}
+              </span>
             </div>
             <div className="hm-progress-track">
-              <div className="hm-progress-fill" style={{ width: `${weeklyPct}%` }} />
-              <span className="hm-progress-pct">{weeklyPct}%</span>
+              <div className="hm-progress-fill" style={{ width: `${videoPct}%` }} />
+              <span className="hm-progress-pct">{videoPct}%</span>
             </div>
           </div>
         </div>
-
-        {/* Today's Workout */}
         <div className="hm-section-header">
           <div className="hm-section-bar" />
           <h3 className="hm-section-title">Today's Workout</h3>
@@ -350,22 +468,31 @@ const HealthModulePage = ({ onNavigate, user }) => {
 
         <div className="hm-today-card" onClick={() => handleWatchVideo(TODAY_WORKOUT.videoId)}>
           <div className="hm-today-thumb">
-            <img src={TODAY_WORKOUT.img} alt={TODAY_WORKOUT.title} />
+            <LazyImg src={TODAY_WORKOUT.img} alt={TODAY_WORKOUT.title} />
             <div className="hm-play-btn">▶</div>
+            {todayDone && <div className="hm-completed-badge">✓ Selesai</div>}
           </div>
           <div className="hm-today-info">
             <h4 className="hm-today-title">{TODAY_WORKOUT.title}</h4>
             <p className="hm-today-meta">{TODAY_WORKOUT.level} · {TODAY_WORKOUT.duration}</p>
             <p className="hm-today-desc">{TODAY_WORKOUT.desc}</p>
-            <button className="hm-tonton-btn" onClick={e => { e.stopPropagation(); handleWatchVideo(TODAY_WORKOUT.videoId); }}>Tonton</button>
+            <button
+              className="hm-tonton-btn"
+              onClick={e => { e.stopPropagation(); handleWatchVideo(TODAY_WORKOUT.videoId); }}
+            >
+              {todayDone ? '▶ Tonton Lagi' : 'Tonton'}
+            </button>
           </div>
         </div>
-
-        {/* Video Tutorial */}
-        <h3 className="hm-section-title-plain">Video Tutorial</h3>
+        <h3 className="hm-section-title">Video Tutorial</h3>
         <div className="hm-video-list">
           {CATEGORIES.map(cat => (
-            <VideoCard key={cat.id} cat={cat} onWatch={() => setActiveDetail(cat)} progress={progress} />
+            <VideoCard
+              key={cat.id}
+              cat={cat}
+              onWatch={handleOpenDetail}
+              progress={progress}
+            />
           ))}
         </div>
       </div>

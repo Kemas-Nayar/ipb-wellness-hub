@@ -24,7 +24,7 @@ const ForgotPasswordPage = ({ onNavigate }) => {
     setError('');
 
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin, // ← hapus ?reset=true, cukup origin
+      redirectTo: window.location.origin,
     });
 
     setIsLoading(false);

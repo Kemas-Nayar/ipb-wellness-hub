@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 import '../styles/ProfilePage.css';
 
-// ─── SVG ICONS ───────────────────────────────────────────────────────────────
 const IcUser = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -60,7 +59,6 @@ const IcEdit = () => (
   </svg>
 );
 
-// ─── MENU CONFIG ─────────────────────────────────────────────────────────────
 const MENU_ITEMS = [
   { Icon: IcUser,     label: 'Informasi Pribadi', page: 'personal-info', color: '#4F46E5' },
   { Icon: IcCalendar, label: 'Riwayat Reservasi', page: 'riwayat-reservasi', color: '#0891B2' },
@@ -68,7 +66,6 @@ const MENU_ITEMS = [
   { Icon: IcSettings, label: 'Pengaturan',         page: 'pengaturan', color: '#6B7280' },
 ];
 
-// ─── COMPONENT ────────────────────────────────────────────────────────────────
 const ProfilePage = ({ onNavigate, user }) => {
   const [profile,    setProfile]    = useState(null);
   const [avatarUrl,  setAvatarUrl]  = useState(null);

@@ -4,17 +4,18 @@ import iwhLogo from '../assets/logo_iwh.png';
 import '../styles/AuthPage.css';
 
 const EyeIcon = ({ open }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     {open ? (
       <>
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-        <circle cx="12" cy="12" r="3" />
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+        <circle cx="12" cy="12" r="3"/>
       </>
     ) : (
       <>
-        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-        <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-        <line x1="1" y1="1" x2="23" y2="23" />
+        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+        <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+        <line x1="1" y1="1" x2="23" y2="23"/>
       </>
     )}
   </svg>
@@ -30,72 +31,99 @@ const GoogleIcon = () => (
 );
 
 const Spinner = () => (
-  <svg className="auth-spinner" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+  <svg className="auth-spinner" width="18" height="18" viewBox="0 0 24 24"
+    fill="none" stroke="currentColor" strokeWidth="2.5">
     <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" strokeLinecap="round"/>
   </svg>
 );
 
 const LoginPage = ({ onNavigate }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [email,        setEmail]        = useState('');
+  const [password,     setPassword]     = useState('');
+  const [error,        setError]        = useState('');
+  const [isLoading,    setIsLoading]    = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  const validate = () => {
+    if (!email.trim())    return 'Masukkan alamat email kamu';
+    if (!/\S+@\S+\.\S+/.test(email)) return 'Format email tidak valid';
+    if (!password)        return 'Masukkan password kamu';
+    return null;
+  };
+
   const handleLogin = async () => {
-    if (!email || !password) {
-      setError('Mohon isi email dan password');
-      return;
-    }
-    if (!/\S+@\S+\.\S+/.test(email)) {
-      setError('Format email tidak valid');
-      return;
-    }
+    const validationError = validate();
+    if (validationError) { setError(validationError); return; }
 
     setIsLoading(true);
     setError('');
 
-    const { error: loginError } = await supabase.auth.signInWithPassword({ email, password });
-    setIsLoading(false);
+    try {
+      const { error: loginError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
 
-    if (loginError) {
-      if (loginError.message.includes('Invalid login credentials')) {
-        setError('Email atau password salah');
-      } else if (loginError.message.includes('Email not confirmed')) {
-        setError('Email belum dikonfirmasi. Cek inbox kamu.');
-      } else {
-        setError(loginError.message);
+      if (loginError) {
+        const msg = loginError.message.toLowerCase();
+        if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
+          setError('Email atau password salah.');
+        } else if (msg.includes('email not confirmed')) {
+          // Shouldn't happen if confirm email is OFF, but handle gracefully
+          setError('Akun belum dikonfirmasi. Hubungi admin.');
+        } else if (msg.includes('too many requests')) {
+          setError('Terlalu banyak percobaan. Coba lagi nanti.');
+        } else if (msg.includes('network') || msg.includes('fetch')) {
+          setError('Koneksi gagal. Periksa internet kamu.');
+        } else {
+          setError(loginError.message);
+        }
       }
+      // On success: onAuthStateChange in App.jsx handles navigation
+    } catch (err) {
+      console.error('[Login] Unexpected error:', err);
+      setError('Terjadi kesalahan. Coba lagi.');
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') handleLogin();
   };
 
   const handleGoogle = async () => {
     setIsLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin },
-    });
-    if (error) {
-      setError('Login Google gagal');
+    setError('');
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin },
+      });
+      if (error) {
+        setError('Login Google gagal: ' + error.message);
+        setIsLoading(false);
+      }
+      // On success: browser redirects, App.jsx handles via URL parsing
+    } catch (err) {
+      console.error('[Login] Google error:', err);
+      setError('Terjadi kesalahan pada Google login.');
       setIsLoading(false);
     }
   };
 
   return (
     <div className="auth-page">
-      {/* Header: back nav + logo */}
       <div className="auth-header">
-        <button className="auth-back-btn" onClick={() => onNavigate('landing')} aria-label="Kembali ke beranda">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <button
+          className="auth-back-btn"
+          onClick={() => onNavigate('landing')}
+          aria-label="Kembali ke beranda"
+          disabled={isLoading}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 5l-7 7 7 7"/>
           </svg>
           Kembali
         </button>
-        <img src={iwhLogo} alt="IPB Wellness Hub" className="auth-logo-iwh" />
+        <img src={iwhLogo} alt="IPB Wellness Hub" className="auth-logo-iwh"/>
       </div>
 
       <div className="auth-body">
@@ -115,11 +143,11 @@ const LoginPage = ({ onNavigate }) => {
             placeholder="Email"
             value={email}
             onChange={(e) => { setEmail(e.target.value); setError(''); }}
-            onKeyDown={handleKeyDown}
+            onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
             disabled={isLoading}
             autoComplete="email"
+            autoFocus
           />
-
           <div className="auth-password-wrapper">
             <input
               className="auth-input"
@@ -127,7 +155,7 @@ const LoginPage = ({ onNavigate }) => {
               placeholder="Password"
               value={password}
               onChange={(e) => { setPassword(e.target.value); setError(''); }}
-              onKeyDown={handleKeyDown}
+              onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
               disabled={isLoading}
               autoComplete="current-password"
             />
@@ -137,37 +165,29 @@ const LoginPage = ({ onNavigate }) => {
               onClick={() => setShowPassword(p => !p)}
               aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
             >
-              <EyeIcon open={showPassword} />
+              <EyeIcon open={showPassword}/>
             </button>
           </div>
         </div>
 
-        <button
-          className="btn-primary"
-          onClick={handleLogin}
-          disabled={isLoading}
-        >
-          {isLoading ? <><Spinner /> Memproses...</> : 'Log In'}
+        <button className="btn-primary" onClick={handleLogin} disabled={isLoading}>
+          {isLoading ? <><Spinner/> Memproses...</> : 'Log In'}
         </button>
 
-        <p className="auth-forgot" onClick={() => onNavigate('forgot')}>
+        <p className="auth-forgot" onClick={() => !isLoading && onNavigate('forgot')}>
           Lupa password?
         </p>
 
         <div className="auth-divider"><span>atau</span></div>
 
-        <button
-          className="btn-google"
-          onClick={handleGoogle}
-          disabled={isLoading}
-        >
-          <GoogleIcon />
+        <button className="btn-google" onClick={handleGoogle} disabled={isLoading}>
+          <GoogleIcon/>
           Lanjutkan dengan Google
         </button>
 
         <p className="auth-footer-text">
           Belum punya akun?{' '}
-          <span className="auth-link" onClick={() => onNavigate('signup')}>
+          <span className="auth-link" onClick={() => !isLoading && onNavigate('signup')}>
             Daftar sekarang
           </span>
         </p>

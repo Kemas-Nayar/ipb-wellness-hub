@@ -1,36 +1,109 @@
-/* ===== BASE ===== */
+:root {
+  --brand-red:     #C8102E;
+  --brand-red-dk:  #a80d25;
+  --brand-gold:    #E8B800;
+  --brand-green:   #27AE60;
+  --brand-blue:    #2F5DAA;
+
+  --border:        #e8e8e8;
+  --border-focus:  var(--brand-red);
+  --border-valid:  #b2dfdb;
+
+  --bg-page:       #f4f4f6;
+  --bg-card:       #ffffff;
+  --bg-input:      #fafafa;
+
+  --text-primary:  #1a1a1a;
+  --text-secondary:#555;
+  --text-muted:    #999;
+  --text-placeholder: #bbb;
+
+  --radius-card:   16px;
+  --radius-input:  12px;
+  --radius-btn:    12px;
+
+  --shadow-card:   0 1px 6px rgba(0,0,0,0.06);
+  --shadow-btn:    0 4px 14px rgba(200,16,46,0.28);
+
+  --font: 'Poppins', sans-serif;
+
+  --transition-fast:   0.15s ease;
+  --transition-normal: 0.25s ease;
+
+  /* Lebar maksimum konten form */
+  --content-max: 760px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ACCESSIBILITY — visually hidden helper */
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/*PAGE SHELL — FULL WIDTH */
 .biodata-page {
   min-height: 100vh;
-  background: #f8f8f8;
-  padding: 0 0 80px; /* bottom padding for keyboard clearance */
+  background: var(--bg-page);
+  padding: 0 0 96px;
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
   width: 100%;
-  max-width: 480px;
-  margin: 0 auto;
+  /* Tidak ada max-width — full width di semua ukuran */
   box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font);
 }
 
-/* Brand accent strip */
+/* Brand accent strip — full width */
 .biodata-page::before {
   content: '';
-  position: absolute;
+  position: fixed;
   top: 0; left: 0; right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #C8102E 0%, #E8B800 100%);
+  height: 3px;
+  background: linear-gradient(90deg, var(--brand-red) 0%, var(--brand-gold) 100%);
+  z-index: 100;
 }
 
-/* ===== HEADER ===== */
+/* Tablet / desktop: TIDAK ada floating card effect, background sama */
+@media (min-width: 600px) {
+  body { background: var(--bg-page); }
+  .biodata-page {
+    margin-top: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+/* CONTENT WIDTH CONSTRAINT */
+.biodata-header,
+.biodata-progress,
+.biodata-steps,
+.biodata-title,
+.biodata-subtitle,
+.bio-submit-error,
+.bio-card,
+.bio-submit-btn,
+.bio-cancel-btn {
+  width: calc(100% - 28px);
+  max-width: var(--content-max);
+  box-sizing: border-box;
+}
+
+/* HEADER */
 .biodata-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 100%;
-  padding: 20px 16px 0;
-  box-sizing: border-box;
+  padding: 22px 16px 0;
 }
 
 .biodata-back-btn {
@@ -41,79 +114,160 @@
   border: none;
   font-size: 13px;
   font-weight: 600;
-  color: #C8102E;
+  color: var(--brand-red);
   cursor: pointer;
-  padding: 6px 0;
-  font-family: 'Poppins', sans-serif;
-  transition: opacity 0.2s;
+  padding: 8px 4px;
+  font-family: var(--font);
+  border-radius: 8px;
+  transition: opacity var(--transition-fast);
+  outline: none;
 }
+.biodata-back-btn:focus-visible {
+  outline: 2px solid var(--brand-red);
+  outline-offset: 2px;
+}
+.biodata-back-btn:hover { opacity: 0.72; }
 
-.biodata-back-btn:hover { opacity: 0.7; }
-
+.biodata-logo-placeholder {
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--brand-red);
+  letter-spacing: -0.3px;
+}
 .biodata-logo {
   height: 36px;
   width: auto;
   object-fit: contain;
 }
 
-/* ===== PROGRESS ===== */
+/* PROGRESS BAR */
 .biodata-progress {
   display: flex;
   align-items: center;
   gap: 10px;
-  width: 100%;
   padding: 14px 16px 0;
-  box-sizing: border-box;
 }
 
 .biodata-progress-track {
   flex: 1;
   height: 4px;
-  background: #e8e8e8;
+  background: var(--border);
   border-radius: 99px;
   overflow: hidden;
 }
 
 .biodata-progress-fill {
-  width: 50%;
   height: 100%;
-  background: linear-gradient(90deg, #C8102E, #E8B800);
+  background: linear-gradient(90deg, var(--brand-red), var(--brand-gold));
   border-radius: 99px;
+  transition: width 0.4s ease;
 }
 
 .biodata-progress-label {
   font-size: 11px;
   font-weight: 600;
-  color: #aaa;
+  color: var(--text-muted);
   white-space: nowrap;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font);
 }
 
-/* ===== TITLE ===== */
+/*  STEP INDICATOR */
+.biodata-steps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 14px 0 0;
+  /* Override width dari content constraint — steps cukup auto */
+  width: auto !important;
+  max-width: none !important;
+}
+
+.biodata-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.biodata-step-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-normal), color var(--transition-normal);
+}
+
+.biodata-step--active .biodata-step-dot {
+  background: var(--brand-red);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(200,16,46,0.3);
+}
+
+.biodata-step--inactive .biodata-step-dot {
+  background: var(--border);
+  color: var(--text-muted);
+}
+
+.biodata-step-label {
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font);
+  letter-spacing: 0.3px;
+}
+
+.biodata-step--active  .biodata-step-label { color: var(--brand-red); }
+.biodata-step--inactive .biodata-step-label { color: var(--text-muted); }
+
+.biodata-step-line {
+  flex: 1;
+  width: 48px;
+  height: 2px;
+  background: var(--border);
+  margin: 0 6px;
+  margin-bottom: 14px;
+}
+
+/* TITLE / SUBTITLE */
 .biodata-title {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font);
   font-size: 24px;
   font-weight: 700;
-  color: #C8102E;
-  margin: 20px 0 6px;
+  color: var(--brand-red);
+  margin: 20px 0 4px;
   text-align: center;
   line-height: 1.2;
+  /* Override width — title centered by text-align */
+  width: auto !important;
+  max-width: none !important;
 }
 
 .biodata-subtitle {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font);
   font-size: 12px;
   font-weight: 400;
-  color: #999;
+  color: var(--text-muted);
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
   padding: 0 20px;
-  line-height: 1.5;
+  line-height: 1.6;
+  width: auto !important;
+  max-width: 520px !important; /* subtitle tetap narrow agar terbaca */
 }
 
-/* ===== ALERTS ===== */
+.bio-required-note {
+  color: var(--brand-red);
+  font-weight: 600;
+  font-size: 11px;
+}
+
+/* ALERTS */
 .bio-submit-error {
-  width: calc(100% - 28px);
   background: #ffebee;
   border: 1px solid #ffcdd2;
   border-radius: 12px;
@@ -125,31 +279,14 @@
   text-align: center;
 }
 
-.bio-success-banner {
-  width: calc(100% - 28px);
-  background: #C8102E;
-  border-radius: 12px;
-  padding: 10px 14px;
-  font-size: 12px;
-  font-weight: 600;
-  color: white;
-  margin-bottom: 12px;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
-/* ===== CARD — clean white, no heavy yellow ===== */
+/* CARD */
 .bio-card {
-  width: calc(100% - 28px);
-  background: #ffffff;
-  border-radius: 16px;
-  overflow: hidden;
+  background: var(--bg-card);
+  border-radius: var(--radius-card);
+  overflow: visible;
   margin-bottom: 12px;
   border: 1px solid #efefef;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-card);
 }
 
 .bio-card-header {
@@ -158,9 +295,9 @@
   gap: 8px;
   padding: 12px 14px 10px;
   border-bottom: 1px solid #f5f5f5;
+  flex-wrap: wrap;
 }
 
-/* Card icon — minimal, no colored circle */
 .bio-card-icon {
   width: 28px;
   height: 28px;
@@ -170,51 +307,103 @@
   flex-shrink: 0;
   background: #fff0f2;
   border-radius: 8px;
+  color: var(--brand-red);
 }
 
 .bio-card-label {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font);
   font-size: 13px;
   font-weight: 700;
-  color: #C8102E;
+  color: var(--brand-red);
   letter-spacing: 0.01em;
 }
 
-.bio-card-body {
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.bio-card-sublabel {
+  font-family: var(--font);
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--text-muted);
+  width: 100%;
+  padding-left: 36px;
+  margin-top: -4px;
 }
 
-/* ===== INPUT ROW ===== */
+.bio-card-body {
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* FIELD GROUP */
+.bio-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.bio-field-label {
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bio-required-star {
+  color: var(--brand-red);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.bio-optional-inline {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: #f0f0f0;
+  border-radius: 99px;
+  padding: 1px 7px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* INPUT ROW */
 .bio-input-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #fafafa;
-  border: 1.5px solid #e8e8e8;
-  border-radius: 12px;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-input);
   padding: 12px 14px;
   box-sizing: border-box;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition:
+    border-color var(--transition-normal),
+    box-shadow   var(--transition-normal),
+    background   var(--transition-normal);
+  color: var(--text-muted);
 }
 
 .bio-input-row:focus-within {
-  border-color: #C8102E;
+  border-color: var(--border-focus);
   background: #fff;
-  box-shadow: 0 0 0 3px rgba(200,16,46,0.07);
+  box-shadow: 0 0 0 3px rgba(200,16,46,0.08);
 }
 
 .bio-input-row.has-error {
-  border-color: #C8102E;
+  border-color: var(--brand-red);
   background: #fff8f8;
-  box-shadow: 0 0 0 3px rgba(200,16,46,0.07);
+  box-shadow: 0 0 0 3px rgba(200,16,46,0.08);
 }
 
 .bio-input-row.has-value {
-  border-color: #b2dfdb;
+  border-color: var(--border-valid);
   background: #fff;
+  color: var(--text-secondary);
 }
 
 .bio-input {
@@ -222,51 +411,54 @@
   border: none;
   outline: none;
   background: transparent;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font);
   font-size: 13px;
   font-weight: 400;
-  color: #333;
+  color: var(--text-primary);
   width: 100%;
   min-width: 0;
 }
 
 .bio-input::placeholder {
-  color: #bbb;
+  color: var(--text-placeholder);
   font-weight: 300;
 }
 
-/* Optional badge inside input row */
-.bio-optional-row { position: relative; }
+.bio-input::-webkit-outer-spin-button,
+.bio-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-.bio-optional-badge {
-  font-family: 'Poppins', sans-serif;
+/* HINT TEXT */
+.bio-hint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font);
   font-size: 10px;
-  font-weight: 600;
-  color: #aaa;
-  background: #f0f0f0;
-  border-radius: 99px;
-  padding: 2px 8px;
-  white-space: nowrap;
-  flex-shrink: 0;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin: 0;
+  padding: 0 2px;
 }
+.bio-hint--center { justify-content: center; }
+.bio-hint svg     { flex-shrink: 0; }
 
-/* ===== ERROR MESSAGE ===== */
+/* ERROR MESSAGE */
 .bio-error-msg {
   display: flex;
   align-items: center;
   gap: 5px;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font);
   font-size: 11px;
   font-weight: 400;
-  color: #C8102E;
-  padding: 2px 4px 0 4px;
+  color: var(--brand-red);
+  padding: 1px 2px 0;
   margin: 0;
 }
 
-.bio-error-msg span {
-  width: 14px;
-  height: 14px;
-  background: #C8102E;
+.bio-error-icon {
+  width: 15px;
+  height: 15px;
+  background: var(--brand-red);
   color: white;
   border-radius: 50%;
   font-size: 9px;
@@ -277,7 +469,7 @@
   flex-shrink: 0;
 }
 
-/* ===== GENDER — bigger tap targets ===== */
+/* GENDER BUTTONS */
 .bio-gender-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -289,93 +481,96 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-height: 48px; /* meets 44px tap target requirement */
+  min-height: 48px;
   padding: 12px 10px;
-  border-radius: 12px;
-  border: 1.5px solid #e8e8e8;
-  background: #fafafa;
-  font-family: 'Poppins', sans-serif;
+  border-radius: var(--radius-input);
+  border: 1.5px solid var(--border);
+  background: var(--bg-input);
+  font-family: var(--font);
   font-size: 13px;
   font-weight: 500;
   color: #666;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    background var(--transition-normal),
+    border-color var(--transition-normal),
+    color var(--transition-normal),
+    box-shadow var(--transition-normal);
   box-sizing: border-box;
+  outline: none;
 }
 
-.bio-gender-btn:hover {
-  border-color: #ddd;
+.bio-gender-btn:focus-visible {
+  outline: 2px solid var(--brand-red);
+  outline-offset: 2px;
+}
+.bio-gender-btn:hover:not(.selected) {
+  border-color: #ccc;
   background: #f3f3f3;
 }
-
 .bio-gender-btn.selected {
-  background: #C8102E;
-  border-color: #C8102E;
+  background: var(--brand-red);
+  border-color: var(--brand-red);
   color: #fff;
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(200,16,46,0.25);
 }
+.bio-gender-btn.has-error { border-color: var(--brand-red); }
 
-.bio-gender-btn.has-error {
-  border-color: #C8102E;
-}
-
-/* ===== DATE ROW ===== */
+/* DATE ROW */
 .bio-date-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fafafa;
-  border: 1.5px solid #e8e8e8;
-  border-radius: 12px;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-input);
   padding: 12px 14px;
   cursor: pointer;
   width: 100%;
   min-height: 48px;
   box-sizing: border-box;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: var(--font);
+  transition:
+    border-color var(--transition-normal),
+    box-shadow   var(--transition-normal),
+    background   var(--transition-normal);
+  outline: none;
 }
 
-.bio-date-row:hover     { border-color: #ddd; background: #f5f5f5; }
+.bio-date-row:hover     { border-color: #ccc; background: #f5f5f5; }
 .bio-date-row:focus-visible {
+  border-color: var(--brand-red);
+  box-shadow: 0 0 0 3px rgba(200,16,46,0.08);
   outline: none;
-  border-color: #C8102E;
-  box-shadow: 0 0 0 3px rgba(200,16,46,0.07);
 }
-.bio-date-row.has-error  { border-color: #C8102E; box-shadow: 0 0 0 3px rgba(200,16,46,0.07); }
-.bio-date-row.has-value  { border-color: #b2dfdb; }
+.bio-date-row.has-error { border-color: var(--brand-red); box-shadow: 0 0 0 3px rgba(200,16,46,0.08); }
+.bio-date-row.has-value { border-color: var(--border-valid); background: #fff; }
 
 .bio-date-left {
   display: flex;
   align-items: center;
   gap: 8px;
+  color: var(--text-muted);
 }
+.bio-date-placeholder { font-size: 13px; font-weight: 300; color: var(--text-placeholder); }
+.bio-date-value       { font-size: 13px; font-weight: 400; color: var(--text-primary); }
 
-.bio-date-placeholder {
-  font-family: 'Poppins', sans-serif;
-  font-size: 13px;
-  font-weight: 300;
-  color: #bbb;
-}
-
-.bio-date-value {
-  font-family: 'Poppins', sans-serif;
-  font-size: 13px;
-  font-weight: 400;
-  color: #333;
-}
-
-/* ===== FISIK ===== */
+/* FISIK — 2-col grid */
 .bio-fisik-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 10px;
 }
 
-.bio-fisik-col { display: flex; flex-direction: column; }
-.bio-fisik-input { padding: 12px 10px; }
+@media (max-width: 340px) {
+  .bio-fisik-row { grid-template-columns: 1fr; }
+}
 
-/* ===== BMI PREVIEW — with contextual range info ===== */
+.bio-fisik-col    { display: flex; flex-direction: column; gap: 5px; }
+.bio-fisik-input  { padding: 12px 10px; }
+
+/* BMI PREVIEW */
 .bio-bmi-preview {
   display: flex;
   align-items: center;
@@ -383,17 +578,16 @@
   border-radius: 12px;
   padding: 14px 16px;
   margin-top: 4px;
-  transition: all 0.3s ease;
+  transition:
+    opacity     0.35s ease,
+    transform   0.35s ease,
+    background  0.35s ease;
 }
 
-.bio-bmi-preview-left {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
+.bio-bmi-preview-left { display: flex; flex-direction: column; gap: 2px; }
 
 .bio-bmi-label {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font);
   font-size: 10px;
   font-weight: 600;
   color: #888;
@@ -401,41 +595,31 @@
   letter-spacing: 0.5px;
   margin: 0;
 }
-
 .bio-bmi-value {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font);
   font-size: 30px;
   font-weight: 700;
   margin: 0;
   line-height: 1;
 }
-
 .bio-bmi-range {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font);
   font-size: 10px;
   font-weight: 400;
   margin: 4px 0 0;
   opacity: 0.7;
 }
-
-.bio-bmi-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-}
-
+.bio-bmi-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
 .bio-bmi-badge {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font);
   font-size: 11px;
   font-weight: 700;
   color: white;
   padding: 5px 14px;
   border-radius: 99px;
 }
-
 .bio-bmi-range-badge {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font);
   font-size: 10px;
   font-weight: 500;
   margin: 0;
@@ -443,101 +627,346 @@
   text-align: right;
 }
 
-/* ===== SUBMIT BUTTON — brand red ===== */
+/* SUBMIT BUTTON */
 .bio-submit-btn {
-  width: calc(100% - 28px);
-  background: #C8102E;
+  background: var(--brand-red);
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-btn);
   padding: 15px;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font);
   font-size: 15px;
   font-weight: 700;
   color: #fff;
   cursor: pointer;
   margin-top: 4px;
-  box-shadow: 0 4px 14px rgba(200,16,46,0.3);
-  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: var(--shadow-btn);
+  transition:
+    background  var(--transition-normal),
+    transform   var(--transition-fast),
+    box-shadow  var(--transition-normal);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  outline: none;
 }
-
+.bio-submit-btn:focus-visible {
+  outline: 2px solid var(--brand-red);
+  outline-offset: 3px;
+}
 .bio-submit-btn:hover:not(:disabled) {
-  background: #a80d25;
+  background: var(--brand-red-dk);
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(200,16,46,0.35);
+  box-shadow: 0 6px 18px rgba(200,16,46,0.32);
 }
-
 .bio-submit-btn:active:not(:disabled) { transform: scale(0.98); }
-.bio-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.bio-submit-btn:disabled              { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
 
-.bio-submit-btn.success {
-  background: #27AE60;
-  box-shadow: 0 4px 14px rgba(39,174,96,0.3);
-}
-
-/* ===== SPINNER ===== */
+/* Spinner */
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.bio-spinner {
-  animation: spin 0.8s linear infinite;
-  flex-shrink: 0;
+.bio-spinner { animation: spin 0.75s linear infinite; flex-shrink: 0; }
+.bio-btn-loading, .bio-btn-success {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
 }
 
-.bio-btn-loading,
-.bio-btn-success {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-/* ===== CANCEL BUTTON — more visible ===== */
+/* CANCEL BUTTON */
 .bio-cancel-btn {
-  width: calc(100% - 28px);
   background: transparent;
-  border: 1.5px solid #ddd;
-  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-btn);
   padding: 13px;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font);
   font-size: 14px;
   font-weight: 600;
   color: #777;
   cursor: pointer;
   margin-top: 8px;
-  transition: border-color 0.2s ease, color 0.2s ease;
+  transition:
+    border-color var(--transition-normal),
+    color        var(--transition-normal);
+  outline: none;
 }
-
+.bio-cancel-btn:focus-visible {
+  outline: 2px solid var(--brand-red);
+  outline-offset: 2px;
+}
 .bio-cancel-btn:hover:not(:disabled) {
-  border-color: #C8102E;
-  color: #C8102E;
+  border-color: var(--brand-red);
+  color: var(--brand-red);
 }
-
 .bio-cancel-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* ===== RESPONSIVE ===== */
+/* INLINE DATE PICKER MODAL */
+.bio-datepicker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: overlayIn 0.2s ease;
+}
+@keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+
+.bio-datepicker-sheet {
+  width: 100%;
+  max-width: 520px;
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  animation: sheetUp 0.28s cubic-bezier(0.32,0.72,0,1);
+}
+@keyframes sheetUp {
+  from { transform: translateY(60px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.bio-datepicker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.bio-datepicker-title {
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.bio-datepicker-close {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-family: var(--font);
+  transition: background var(--transition-fast);
+  outline: none;
+}
+.bio-datepicker-close:focus-visible { outline: 2px solid var(--brand-red); }
+.bio-datepicker-close:hover         { background: #f5f5f5; }
+
+.bio-datepicker-body  { padding: 16px 18px; }
+.bio-datepicker-row   { display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 10px; }
+
+.bio-datepicker-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.bio-datepicker-label {
+  font-family: var(--font);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.bio-datepicker-input {
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: var(--bg-input);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.bio-datepicker-input:focus {
+  border-color: var(--brand-red);
+  box-shadow: 0 0 0 3px rgba(200,16,46,0.08);
+}
+.bio-datepicker-select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+
+.bio-datepicker-err {
+  font-family: var(--font);
+  font-size: 11px;
+  color: var(--brand-red);
+  margin: 8px 0 0;
+}
+
+.bio-datepicker-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 0 18px 18px;
+}
+.bio-datepicker-cancel {
+  background: #f5f5f5;
+  border: none;
+  border-radius: 10px;
+  padding: 13px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  outline: none;
+  transition: background var(--transition-fast);
+}
+.bio-datepicker-cancel:focus-visible { outline: 2px solid var(--brand-red); }
+.bio-datepicker-cancel:hover         { background: #ebebeb; }
+
+.bio-datepicker-done {
+  background: var(--brand-red);
+  border: none;
+  border-radius: 10px;
+  padding: 13px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  outline: none;
+  box-shadow: 0 3px 10px rgba(200,16,46,0.25);
+  transition: background var(--transition-fast), box-shadow var(--transition-fast);
+}
+.bio-datepicker-done:focus-visible { outline: 2px solid #fff; outline-offset: -3px; }
+.bio-datepicker-done:hover         { background: var(--brand-red-dk); }
+
+/* CANCEL CONFIRM DIALOG */
+.bio-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  animation: overlayIn 0.18s ease;
+}
+
+.bio-dialog-sheet {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px 20px 20px;
+  width: 100%;
+  max-width: 340px;
+  animation: dialogPop 0.22s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes dialogPop {
+  from { transform: scale(0.92); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+.bio-dialog-title {
+  font-family: var(--font);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+}
+.bio-dialog-body {
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0 0 20px;
+}
+.bio-dialog-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.bio-dialog-keep {
+  background: #f5f5f5;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  outline: none;
+  transition: background var(--transition-fast);
+}
+.bio-dialog-keep:focus-visible { outline: 2px solid var(--brand-red); }
+.bio-dialog-keep:hover         { background: #ebebeb; }
+
+.bio-dialog-leave {
+  background: var(--brand-red);
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  outline: none;
+  transition: background var(--transition-fast);
+}
+.bio-dialog-leave:focus-visible { outline: 2px solid #fff; outline-offset: -3px; }
+.bio-dialog-leave:hover         { background: var(--brand-red-dk); }
+
+/* RESPONSIVE */
 @media (min-width: 480px) {
-  .biodata-page    { padding-bottom: 80px; }
   .biodata-title   { font-size: 26px; }
   .bio-input       { font-size: 14px; }
   .bio-date-placeholder,
   .bio-date-value  { font-size: 14px; }
-  .biodata-header  { padding: 20px 20px 0; }
-  .biodata-progress { padding: 14px 20px 0; }
-  .bio-card        { width: calc(100% - 40px); }
+
+  .biodata-header,
+  .biodata-progress,
+  .bio-card,
   .bio-submit-btn,
-  .bio-cancel-btn  { width: calc(100% - 40px); }
-  .bio-submit-error,
-  .bio-success-banner { width: calc(100% - 40px); }
+  .bio-cancel-btn,
+  .bio-submit-error {
+    width: calc(100% - 40px);
+  }
 }
 
 @media (min-width: 640px) {
-  .biodata-title { font-size: 28px; }
-  .biodata-header { padding: 24px 24px 0; }
-  .biodata-progress { padding: 14px 24px 0; }
-  .bio-card        { width: calc(100% - 48px); }
+  .biodata-title   { font-size: 28px; }
+
+  .biodata-header,
+  .biodata-progress,
+  .bio-card,
   .bio-submit-btn,
-  .bio-cancel-btn  { width: calc(100% - 48px); }
+  .bio-cancel-btn,
+  .bio-submit-error {
+    width: calc(100% - 48px);
+  }
+}
+
+@media (min-width: 900px) {
+  .biodata-header,
+  .biodata-progress,
+  .bio-card,
+  .bio-submit-btn,
+  .bio-cancel-btn,
+  .bio-submit-error {
+    width: calc(100% - 80px);
+    max-width: var(--content-max);
+  }
+}
+
+@media (min-width: 1200px) {
+  .biodata-header,
+  .biodata-progress,
+  .bio-card,
+  .bio-submit-btn,
+  .bio-cancel-btn,
+  .bio-submit-error {
+    width: calc(100% - 120px);
+    max-width: var(--content-max);
+  }
 }

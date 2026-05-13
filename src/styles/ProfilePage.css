@@ -1,4 +1,4 @@
-/* ─── BASE ───────────────────────────────────────────────────────────────────── */
+/* BASE */
 .pp-page {
   min-height: 100vh;
   background: #F3F4F6;
@@ -6,7 +6,7 @@
   font-family: 'Poppins', sans-serif;
 }
 
-/* ─── HEADER ─────────────────────────────────────────────────────────────────── */
+/* HEADER */
 .pp-header {
   display: flex;
   align-items: center;
@@ -36,7 +36,7 @@
   color: #111827;
 }
 
-/* ─── PROFILE CARD ───────────────────────────────────────────────────────────── */
+/* PROFILE CARD */
 .pp-card {
   background: #fff;
   margin-bottom: 10px;
@@ -54,7 +54,7 @@
   padding: 0 16px 18px;
 }
 
-/* ─── AVATAR ─────────────────────────────────────────────────────────────────── */
+/* AVATAR */
 .pp-avatar-wrap {
   margin-top: -28px;
   flex-shrink: 0;
@@ -150,7 +150,7 @@
   padding: 10px 16px 6px;
 }
 
-/* ─── MENU GROUP ─────────────────────────────────────────────────────────────── */
+/* MENU GROUP */
 .pp-menu-group {
   background: #fff;
   border-radius: 14px;
