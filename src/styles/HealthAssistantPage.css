@@ -1,0 +1,327 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+/* ─── Base ─────────────────────────────────────────────────────────────────── */
+.ha-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #fdf4f4;
+  font-family: 'Poppins', sans-serif;
+  max-width: 480px;
+  margin: 0 auto;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ─── Header ───────────────────────────────────────────────────────────────── */
+.ha-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: #fff;
+  border-bottom: 1px solid rgba(204, 34, 34, 0.08);
+  box-shadow: 0 2px 12px rgba(204, 34, 34, 0.06);
+  position: relative;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.ha-back-btn {
+  width: 34px;
+  height: 34px;
+  background: #fdf4f4;
+  border: 1.5px solid #f0dada;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #CC2222;
+  flex-shrink: 0;
+  transition: background 0.18s ease, transform 0.15s ease, box-shadow 0.18s ease;
+}
+.ha-back-btn:hover {
+  background: #fce8e8;
+  box-shadow: 0 2px 8px rgba(204,34,34,0.15);
+}
+.ha-back-btn:active { transform: scale(0.9); }
+
+/* Avatar with online dot */
+.ha-header-avatar {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+.ha-header-avatar img {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 2px solid #fce8e8;
+}
+.ha-online-dot {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 9px;
+  height: 9px;
+  background: #22c55e;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  animation: ha-pulse-dot 2s ease-in-out infinite;
+}
+@keyframes ha-pulse-dot {
+  0%, 100% { transform: scale(1);    opacity: 1; }
+  50%       { transform: scale(1.25); opacity: 0.7; }
+}
+
+.ha-header-text { flex: 1; min-width: 0; }
+
+.ha-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.ha-subtitle {
+  font-size: 10.5px;
+  color: #aaa;
+  margin: 1px 0 0;
+}
+
+.ha-clear-btn {
+  width: 34px;
+  height: 34px;
+  background: #fdf4f4;
+  border: 1.5px solid #f0dada;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ccc;
+  flex-shrink: 0;
+  transition: color 0.18s, background 0.18s, transform 0.15s;
+}
+.ha-clear-btn:hover  { color: #CC2222; background: #fce8e8; }
+.ha-clear-btn:active { transform: scale(0.9); }
+
+/* ─── Body ─────────────────────────────────────────────────────────────────── */
+.ha-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scroll-behavior: smooth;
+}
+.ha-body::-webkit-scrollbar       { width: 3px; }
+.ha-body::-webkit-scrollbar-track { background: transparent; }
+.ha-body::-webkit-scrollbar-thumb { background: #f0dada; border-radius: 4px; }
+
+/* Date divider */
+.ha-date-label {
+  text-align: center;
+  font-size: 10.5px;
+  color: #ccc;
+  letter-spacing: 0.4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.ha-date-label::before,
+.ha-date-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #f0dada, transparent);
+}
+
+/* Chat area */
+.ha-chat-area {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ─── Message rows ──────────────────────────────────────────────────────────── */
+.ha-msg-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+.ha-msg-user { flex-direction: row-reverse; }
+
+/* Entrance animation */
+.ha-anim-in {
+  animation: ha-slide-up 0.3s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+@keyframes ha-slide-up {
+  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+.ha-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1.5px solid #fce8e8;
+  box-shadow: 0 2px 6px rgba(204,34,34,0.1);
+}
+
+/* ─── Bubbles ───────────────────────────────────────────────────────────────── */
+.ha-bubble {
+  max-width: 76%;
+  padding: 11px 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.ha-bubble-ai {
+  background: #fff;
+  border: 2px solid #CC2222;
+  color: #1a1a1a;
+  border-radius: 4px 16px 16px 16px;
+  box-shadow: 0 3px 12px rgba(204, 34, 34, 0.1);
+}
+
+.ha-bubble-user {
+  background: #FFD24D;
+  color: #1a1a1a;
+  border-radius: 16px 4px 16px 16px;
+  box-shadow: 0 3px 10px rgba(255, 210, 77, 0.35);
+  font-weight: 500;
+}
+
+/* ─── Typing indicator ──────────────────────────────────────────────────────── */
+.ha-typing {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  padding: 13px 16px;
+}
+.ha-typing span {
+  width: 7px;
+  height: 7px;
+  background: #CC2222;
+  border-radius: 50%;
+  opacity: 0.55;
+  animation: ha-bounce 1.1s ease-in-out infinite;
+}
+.ha-typing span:nth-child(1) { animation-delay: 0s; }
+.ha-typing span:nth-child(2) { animation-delay: 0.18s; }
+.ha-typing span:nth-child(3) { animation-delay: 0.36s; }
+
+@keyframes ha-bounce {
+  0%, 60%, 100% { transform: translateY(0);   opacity: 0.55; }
+  30%            { transform: translateY(-7px); opacity: 1; }
+}
+
+/* ─── Quick topics ──────────────────────────────────────────────────────────── */
+.ha-quick-topics {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-bottom: 4px;
+}
+
+.ha-topic-btn {
+  background: #fff;
+  border: 1.5px solid #f0dada;
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  color: #1a1a1a;
+  box-shadow: 0 1px 4px rgba(204,34,34,0.07);
+  transition: all 0.22s cubic-bezier(0.34, 1.4, 0.64, 1);
+  animation: ha-chip-in 0.35s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+@keyframes ha-chip-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.9); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+.ha-topic-btn:hover:not(:disabled) {
+  background: #FFD24D;
+  border-color: #FFD24D;
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 5px 14px rgba(255,210,77,0.4);
+}
+.ha-topic-btn:active:not(:disabled) { transform: scale(0.93); }
+.ha-topic-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ─── Input bar ─────────────────────────────────────────────────────────────── */
+.ha-input-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px 16px;
+  background: #fff;
+  border-top: 1px solid rgba(204,34,34,0.07);
+  box-shadow: 0 -4px 16px rgba(204,34,34,0.05);
+  flex-shrink: 0;
+}
+
+.ha-input-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: #fdf4f4;
+  border: 1.5px solid #f0dada;
+  border-radius: 14px;
+  padding: 0 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.ha-input-wrap--active,
+.ha-input-wrap:focus-within {
+  border-color: #CC2222;
+  box-shadow: 0 0 0 3px rgba(204,34,34,0.08);
+}
+
+.ha-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 13.5px;
+  font-family: 'Poppins', sans-serif;
+  color: #1a1a1a;
+  background: transparent;
+  padding: 11px 0;
+}
+.ha-input::placeholder { color: #ccc; }
+
+.ha-send-btn {
+  width: 42px;
+  height: 42px;
+  background: #eee;
+  border: none;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: not-allowed;
+  transition: background 0.2s ease, transform 0.15s cubic-bezier(0.34,1.4,0.64,1), box-shadow 0.2s ease;
+}
+.ha-send-btn--active {
+  background: #FFD24D;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(255,210,77,0.4);
+}
+.ha-send-btn--active:hover {
+  background: #ffc800;
+  transform: scale(1.08);
+  box-shadow: 0 5px 16px rgba(255,210,77,0.5);
+}
+.ha-send-btn--active:active { transform: scale(0.91); }
