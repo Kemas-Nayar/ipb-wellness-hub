@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useToast } from './Toast';
 import '../styles/PengaturanPage.css';
 
 const PengaturanPage = ({ onNavigate }) => {
+  const toast = useToast();
   const [notifOn, setNotifOn] = useState(() =>
     localStorage.getItem('pref_notif') === 'true'
   );
@@ -22,12 +24,12 @@ const PengaturanPage = ({ onNavigate }) => {
     const handleToggleNotif = async () => {
     if (!notifOn) {
       if (!('Notification' in window)) {
-        alert('Browser kamu tidak mendukung notifikasi.');
+        toast.warning('Browser kamu tidak mendukung notifikasi.');
         return;
       }
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') {
-        alert('Izin notifikasi ditolak. Aktifkan melalui pengaturan browser.');
+        toast.error('Izin notifikasi ditolak. Aktifkan melalui pengaturan browser.');
         return;
       }
       new Notification('NutriGym IPB', {

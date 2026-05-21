@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
+import { useToast } from './Toast';
 import '../styles/ProfilePage.css';
 
 const IcUser = () => (
@@ -70,6 +71,7 @@ const ProfilePage = ({ onNavigate, user }) => {
   const [profile,    setProfile]    = useState(null);
   const [avatarUrl,  setAvatarUrl]  = useState(null);
   const [uploading,  setUploading]  = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     if (!user) return;
@@ -102,8 +104,8 @@ const ProfilePage = ({ onNavigate, user }) => {
     if (!file || !user) return;
 
     // Validasi ukuran & tipe
-    if (file.size > 2 * 1024 * 1024) { alert('Ukuran foto maksimal 2MB'); return; }
-    if (!file.type.startsWith('image/')) { alert('File harus berupa gambar'); return; }
+    if (file.size > 2 * 1024 * 1024) { toast.error('Ukuran foto maksimal 2MB'); return; }
+    if (!file.type.startsWith('image/')) { toast.error('File harus berupa gambar'); return; }
 
     setUploading(true);
     try {
@@ -132,8 +134,9 @@ const ProfilePage = ({ onNavigate, user }) => {
 
       // Tampilkan preview langsung
       setAvatarUrl(publicUrl);
+      toast.success('Foto profil berhasil diperbarui!');
     } catch (err) {
-      alert('Gagal upload foto: ' + err.message);
+      toast.error('Gagal upload foto: ' + err.message);
     } finally {
       setUploading(false);
     }

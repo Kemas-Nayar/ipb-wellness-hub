@@ -970,3 +970,20 @@
     max-width: var(--content-max);
   }
 }
+
+/* Realtime validation: green checkmark */
+.bio-field-valid {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #1A9E5C;
+  font-size: 15px;
+  font-weight: 700;
+  pointer-events: none;
+  animation: validFadeIn 0.2s ease;
+}
+@keyframes validFadeIn {
+  from { opacity: 0; transform: translateY(-50%) scale(0.7); }
+  to   { opacity: 1; transform: translateY(-50%) scale(1); }
+}

@@ -240,6 +240,29 @@ const BiodataPage = ({ onNavigate, user, initialData }) => {
 
   const clearError = (field) => setErrors(prev => ({ ...prev, [field]: '' }));
 
+  // Realtime single-field validation on blur
+  const validateField = (field, value) => {
+    let msg = '';
+    if (field === 'namaLengkap' && !value.trim()) msg = 'Nama lengkap wajib diisi';
+    if (field === 'email') {
+      if (!value.trim()) msg = 'Email wajib diisi';
+      else if (!/\S+@\S+\.\S+/.test(value.trim())) msg = 'Format email tidak valid';
+    }
+    if (field === 'berat') {
+      const b = parseFloat(normalizeDecimal(value));
+      if (!value.trim()) msg = 'Berat badan wajib diisi';
+      else if (isNaN(b) || b <= 0) msg = 'Berat harus lebih dari 0';
+      else if (b > 300) msg = 'Berat tidak valid (maks 300 kg)';
+    }
+    if (field === 'tinggi') {
+      const t = parseFloat(normalizeDecimal(value));
+      if (!value.trim()) msg = 'Tinggi badan wajib diisi';
+      else if (isNaN(t) || t <= 0) msg = 'Tinggi harus lebih dari 0';
+      else if (t > 300) msg = 'Tinggi tidak valid (maks 300 cm)';
+    }
+    setErrors(prev => ({ ...prev, [field]: msg }));
+  };
+
   const isDirty = !!(namaLengkap || gender || tanggalLahir || email || berat || tinggi);
 
     const validate = () => {
@@ -338,6 +361,18 @@ const BiodataPage = ({ onNavigate, user, initialData }) => {
     </p>
   ) : null;
 
+  // Show green checkmark when field has value and no error
+  const FieldValid = ({ field, value }) => {
+    const hasValue = value && String(value).trim().length > 0;
+    const hasError = !!errors[field];
+    if (!hasValue || hasError) return null;
+    return (
+      <span className="bio-field-valid" aria-label="Valid" title="Valid">
+        ✓
+      </span>
+    );
+  };
+
     return (
     <div className="biodata-page">
       {showCancel && (
@@ -419,7 +454,7 @@ const BiodataPage = ({ onNavigate, user, initialData }) => {
                 type="text"
                 placeholder="Nama lengkap sesuai KTP"
                 value={namaLengkap}
-                onChange={e => { setNamaLengkap(e.target.value); clearError('namaLengkap'); }}
+                onChange={e => { setNamaLengkap(e.target.value); clearError('namaLengkap'); }} onBlur={e => validateField('namaLengkap', e.target.value)}
                 className="bio-input"
                 autoComplete="name"
                 aria-required="true"
@@ -507,7 +542,7 @@ const BiodataPage = ({ onNavigate, user, initialData }) => {
                 type="email"
                 placeholder="contoh@email.com"
                 value={email}
-                onChange={e => { setEmail(e.target.value); clearError('email'); }}
+                onChange={e => { setEmail(e.target.value); clearError('email'); }} onBlur={e => validateField('email', e.target.value)}
                 className="bio-input"
                 autoComplete="email"
                 inputMode="email"
@@ -568,7 +603,7 @@ const BiodataPage = ({ onNavigate, user, initialData }) => {
                   inputMode="decimal"
                   placeholder="kg"
                   value={berat}
-                  onChange={e => { setBerat(sanitizeDecimalInput(e.target.value)); clearError('berat'); }}
+                  onChange={e => { setBerat(sanitizeDecimalInput(e.target.value)); clearError('berat'); }} onBlur={e => validateField('berat', e.target.value)}
                   className="bio-input"
                   aria-required="true"
                   aria-invalid={!!errors.berat}
@@ -591,7 +626,7 @@ const BiodataPage = ({ onNavigate, user, initialData }) => {
                   inputMode="decimal"
                   placeholder="cm"
                   value={tinggi}
-                  onChange={e => { setTinggi(sanitizeDecimalInput(e.target.value)); clearError('tinggi'); }}
+                  onChange={e => { setTinggi(sanitizeDecimalInput(e.target.value)); clearError('tinggi'); }} onBlur={e => validateField('tinggi', e.target.value)}
                   className="bio-input"
                   aria-required="true"
                   aria-invalid={!!errors.tinggi}
