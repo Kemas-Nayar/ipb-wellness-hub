@@ -50,7 +50,7 @@ const LogoutPage           = lazy(() => import("./components/LogoutPage"));
 const HealthAssistantPage  = lazy(() => import("./components/Healthassistantpage"));
 const HealthModulePage     = lazy(() => import("./components/Healthmodulepage"));
 const GymReservationPage   = lazy(() => import("./components/Gymreservationpage"));
-const QRScanPage           = lazy(() => import("./components/Qrscanpage"));
+const QRScanPage           = lazy(() => import("./components/QRScanPage"));
 const AdminDashboard       = lazy(() => import("./components/AdminDashboard"));
 
 // ─────────────────────────────────────────────

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../supabase';
-import '../styles/Qrscanpage.css';
+import '../styles/QRScanPage.css';
 
 const vibrate = (pattern) => {
   if ('vibrate' in navigator) try { navigator.vibrate(pattern); } catch (_) {}
