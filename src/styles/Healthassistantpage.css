@@ -515,3 +515,103 @@
 @media (min-width: 1280px) {
   .ha-sidebar { width: 300px; }
 }
+
+/* ─── Sidebar user card ──────────────────────────────────────────────────────── */
+.ha-sidebar-usercard {
+  background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
+  border: 1.5px solid #f0dada;
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ha-sidebar-usercard-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+.ha-sidebar-usercard-bmi {
+  font-size: 11.5px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* BMI status badges */
+.ha-bmi-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  color: #fff;
+  letter-spacing: 0.2px;
+}
+.ha-bmi-badge.ha-bmi-kurus    { background: #2F5DAA; }
+.ha-bmi-badge.ha-bmi-normal   { background: #27AE60; }
+.ha-bmi-badge.ha-bmi-gemuk    { background: #F2994A; }
+.ha-bmi-badge.ha-bmi-obesitas { background: #C8102E; }
+
+/* ─── Profile loading indicator ─────────────────────────────────────────────── */
+.ha-profile-loading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11.5px;
+  color: #aaa;
+  padding: 4px 0;
+}
+.ha-profile-loading-dot {
+  width: 8px;
+  height: 8px;
+  border: 2px solid #f0dada;
+  border-top-color: #CC2222;
+  border-radius: 50%;
+  animation: ha-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes ha-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Weight confirm action buttons ─────────────────────────────────────────── */
+.ha-confirm-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ha-confirm-btn {
+  padding: 7px 16px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.ha-confirm-yes {
+  background: #27AE60;
+  color: #fff;
+}
+.ha-confirm-yes:hover {
+  background: #219a52;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.35);
+}
+.ha-confirm-yes:active { transform: scale(0.95); }
+
+.ha-confirm-no {
+  background: #f5f5f5;
+  color: #888;
+  border: 1.5px solid #e5e5e5 !important;
+}
+.ha-confirm-no:hover {
+  background: #fce8e8;
+  border-color: #f0dada !important;
+  color: #CC2222;
+}
+.ha-confirm-no:active { transform: scale(0.95); }
