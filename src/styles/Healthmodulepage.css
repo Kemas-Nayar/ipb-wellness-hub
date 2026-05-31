@@ -76,6 +76,8 @@
   gap: 12px;
   padding: 16px 16px 12px;
   background: var(--bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   position: sticky;
   top: 0;
   z-index: 10;
