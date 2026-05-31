@@ -4,6 +4,7 @@
   background: #F3F4F6;
   padding-bottom: 40px;
   font-family: 'Poppins', sans-serif;
+  width: 100%;
 }
 
 /* HEADER */
@@ -43,8 +44,17 @@
 }
 
 .pp-banner {
-  height: 64px;
-  background: linear-gradient(135deg, #E5E7EB 0%, #D1D5DB 100%);
+  height: 100px;
+  background: linear-gradient(135deg, #C8102E 0%, #E63946 100%);
+  position: relative;
+  overflow: hidden;
+}
+.pp-banner::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.1)" stroke-width="2" fill="none"/></svg>') repeat;
+  opacity: 0.5;
 }
 
 .pp-info-row {
@@ -56,8 +66,10 @@
 
 /* AVATAR */
 .pp-avatar-wrap {
-  margin-top: -28px;
+  margin-top: -36px;
   flex-shrink: 0;
+  position: relative;
+  z-index: 2;
 }
 
 .pp-avatar-label {
@@ -164,20 +176,31 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 16px;
+  padding: 16px;
   background: none;
   border: none;
   border-bottom: 1px solid #F9FAFB;
   cursor: pointer;
   text-align: left;
   font-family: 'Poppins', sans-serif;
-  transition: background 0.12s;
+  transition: all 0.2s ease;
 }
 .pp-menu-item:last-child  { border-bottom: none; }
-.pp-menu-item:hover       { background: #F9FAFB; }
-.pp-menu-item:active      { background: #F3F4F6; }
 
-.pp-menu-item--danger:hover { background: #FFF5F5; }
+/* HOVER EFFECT: ONLY ICON BACKGROUND RED */
+.pp-menu-item:hover { 
+  background: #F9FAFB; 
+}
+.pp-menu-item:hover .pp-menu-icon-wrap {
+  background: #C8102E !important;
+}
+.pp-menu-item:hover .pp-menu-icon-wrap span {
+  color: #FFF !important;
+}
+.pp-menu-item:hover .pp-menu-icon-wrap svg {
+  stroke: currentColor;
+}
+.pp-menu-item:active { background: #F3F4F6; }
 
 .pp-menu-icon-wrap {
   width: 36px;

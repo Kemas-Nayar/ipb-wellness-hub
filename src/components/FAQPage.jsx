@@ -17,7 +17,7 @@ const IconSearch = () => (
 
 // 💡 Lightbulb — "Memulai"
 const IconLightbulb = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C8102E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M9 21h6" />
     <path d="M12 3a6 6 0 0 1 6 6c0 2.22-1.21 4.16-3 5.2V17a1 1 0 0 1-1 1H10a1 1 0 0 1-1-1v-2.8C7.21 13.16 6 11.22 6 9a6 6 0 0 1 6-6z" />
   </svg>
@@ -25,7 +25,7 @@ const IconLightbulb = () => (
 
 // ✅ Check-circle — "Reservasi"
 const IconCheckCircle = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C8102E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="10" />
     <path d="M8 12l3 3 5-5" />
   </svg>
@@ -33,7 +33,7 @@ const IconCheckCircle = () => (
 
 // 👤 User — "Akun"
 const IconUser = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C8102E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="8" r="4" />
     <path d="M4 20c0-4 3.58-7 8-7s8 3 8 7" />
   </svg>
@@ -96,19 +96,19 @@ const FAQ_CATEGORIES = [
   {
     id: 1,
     Icon: IconLightbulb,
-    bgColor: '#FEF3C7',
+    bgColor: '#FFF0F0',
     label: 'Memulai IPB Wellness Hub',
   },
   {
     id: 2,
     Icon: IconCheckCircle,
-    bgColor: '#DBEAFE',
+    bgColor: '#FFF0F0',
     label: 'Reservasi & Pembayaran',
   },
   {
     id: 3,
     Icon: IconUser,
-    bgColor: '#FCE7E7',
+    bgColor: '#FFF0F0',
     label: 'Akun & Pengaturan',
   },
 ];

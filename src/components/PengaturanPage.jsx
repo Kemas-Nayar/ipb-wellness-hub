@@ -105,8 +105,8 @@ const PengaturanPage = ({ onNavigate }) => {
           role="button"
           aria-expanded={showLangPicker}
         >
-          <div className="pg-item-icon" style={{ background: 'var(--pg-icon-blue-bg)' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2F5DAA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <div className="pg-item-icon" style={{ background: '#FFF0F0' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C8102E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10"/>
               <path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/>
             </svg>
@@ -134,7 +134,13 @@ const PengaturanPage = ({ onNavigate }) => {
                 className={`pg-lang-option ${bahasa === lang ? 'pg-lang-active' : ''}`}
                 onClick={() => handlePilihBahasa(lang)}
               >
-                <span className="pg-lang-check">{bahasa === lang ? '✓' : ''}</span>
+                <span className="pg-lang-check">
+                  {bahasa === lang ? (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  ) : ''}
+                </span>
                 {lang}
               </button>
             ))}
@@ -145,8 +151,8 @@ const PengaturanPage = ({ onNavigate }) => {
 
         {/* Mode Gelap */}
         <div className="pg-item">
-          <div className="pg-item-icon" style={{ background: 'var(--pg-icon-purple-bg)' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <div className="pg-item-icon" style={{ background: '#FFF0F0' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C8102E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               {darkMode
                 ? <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
                 : <>
@@ -178,8 +184,8 @@ const PengaturanPage = ({ onNavigate }) => {
 
         {/* Tentang Kami */}
         <button className="pg-item pg-item-btn" onClick={() => setShowAbout(!showAbout)}>
-          <div className="pg-item-icon" style={{ background: 'var(--pg-icon-green-bg)' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#27AE60" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <div className="pg-item-icon" style={{ background: '#FFF0F0' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C8102E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10"/>
               <path d="M12 16v-4M12 8h.01"/>
             </svg>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../supabase';
 import '../styles/Gymreservationpage.css';
 
@@ -59,9 +59,10 @@ const IcUsers = () => (
     <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
   </svg>
 );
-const IcCheckCircle = () => (
-  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+const IcCheckCircle = ({ size = 40 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="20 6 9 17 4 12"/>
+    {size > 20 ? null : <circle cx="12" cy="12" r="10" strokeWidth="2"/>}
   </svg>
 );
 const IcConfetti = () => (
@@ -85,7 +86,7 @@ const Skeleton = () => (
 );
 
 
-const Calendar = ({ year, month, selectedDate, onSelectDate, onPrev, onNext }) => {
+const Calendar = ({ year, month, selectedDate, onSelectDate, onPrev, onNext, reservationMap = {} }) => {
   const today       = new Date();
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay    = getFirstDay(year, month);
@@ -111,6 +112,9 @@ const Calendar = ({ year, month, selectedDate, onSelectDate, onPrev, onNext }) =
         {cells.map((c, i) => {
           const sel = c.curr && selectedDate === c.day;
           const dis = !c.curr || isPast(c.day);
+          const dateStr = c.curr ? toDateStr(year, month, c.day) : '';
+          const count = c.curr ? (reservationMap[dateStr] || 0) : 0;
+
           return (
             <button key={i} disabled={dis}
               onClick={() => !dis && onSelectDate(c.day)}
@@ -121,7 +125,14 @@ const Calendar = ({ year, month, selectedDate, onSelectDate, onPrev, onNext }) =
                 c.curr && isToday(c.day) && !sel ? 'gr-cal-day--today' : '',
                 sel                              ? 'gr-cal-day--sel'   : '',
               ].filter(Boolean).join(' ')}>
-              {c.day}
+              <span>{c.day}</span>
+              {count > 0 && (
+                <div className="gr-cal-dots">
+                  {Array.from({length: Math.min(count, 3)}).map((_, idx) => (
+                    <div key={idx} className="gr-cal-dot" />
+                  ))}
+                </div>
+              )}
             </button>
           );
         })}
@@ -325,7 +336,50 @@ const GymReservationPage = ({ onNavigate, user }) => {
   const [busy,    setBusy]    = useState(false);
   const [error,   setError]   = useState('');
 
-    const loadSessions = useCallback(async (y, m, d) => {
+  const [userReservations, setUserReservations] = useState([]);
+  const [loadingRes, setLoadingRes] = useState(true);
+
+  const fetchUserReservations = useCallback(async () => {
+    if (!user) return;
+    setLoadingRes(true);
+    const { data } = await supabase
+      .from('reservations')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('date', { ascending: false });
+    setUserReservations(data || []);
+    setLoadingRes(false);
+  }, [user]);
+
+  useEffect(() => {
+    fetchUserReservations();
+  }, [fetchUserReservations]);
+
+  const todayDateStr = toDateStr(today.getFullYear(), today.getMonth(), today.getDate());
+
+  const stats = useMemo(() => {
+    const total = userReservations.length;
+    const upcoming = userReservations.filter(r => r.date >= todayDateStr);
+    const completed = userReservations.filter(r => r.date < todayDateStr);
+    
+    return {
+      total,
+      upcomingCount: upcoming.length,
+      completedCount: completed.length,
+      upcomingList: upcoming.sort((a,b) => a.date.localeCompare(b.date)),
+      historyList: completed
+    };
+  }, [userReservations, todayDateStr]);
+
+  const reservationMap = useMemo(() => {
+    const map = {};
+    userReservations.forEach(r => {
+      map[r.date] = (map[r.date] || 0) + 1;
+    });
+    return map;
+  }, [userReservations]);
+
+  const loadSessions = useCallback(async (y, m, d) => {
     setLoadSess(true);
     setSelSess(null);
     try {
@@ -346,30 +400,17 @@ const GymReservationPage = ({ onNavigate, user }) => {
   // Realtime subscription
   useEffect(() => {
     if (!selDate) return;
-
     const dateStr = toDateStr(year, month, selDate);
-
     const channel = supabase
       .channel(`reservations-${dateStr}`)
       .on(
         'postgres_changes',
-        {
-
-          schema: 'public',
-          table:  'reservations',
-          filter: `date=eq.${dateStr}`,
-        },
-        () => {
-
-          loadSessions(year, month, selDate);
-        }
+        { schema: 'public', table:  'reservations', filter: `date=eq.${dateStr}` },
+        () => { loadSessions(year, month, selDate); fetchUserReservations(); }
       )
       .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [selDate, year, month, loadSessions]);
+    return () => { supabase.removeChannel(channel); };
+  }, [selDate, year, month, loadSessions, fetchUserReservations]);
 
   // Month navigation
   const prevMonth = () => {
@@ -383,13 +424,12 @@ const GymReservationPage = ({ onNavigate, user }) => {
     else setMonth(m => m + 1);
   };
 
-    const handleConfirm = async () => {
+  const handleConfirm = async () => {
     if (!selDate || !selSess || !user) return;
     setBusy(true); setError('');
 
     try {
       const dateStr = toDateStr(year, month, selDate);
-
 
       const { data: existing } = await supabase
         .from('reservations')
@@ -399,7 +439,6 @@ const GymReservationPage = ({ onNavigate, user }) => {
         .maybeSingle();
 
       if (existing) throw new Error('Kamu sudah memiliki reservasi pada tanggal ini.');
-
 
       const { count: currentCount } = await supabase
         .from('reservations')
@@ -411,7 +450,6 @@ const GymReservationPage = ({ onNavigate, user }) => {
       if ((currentCount ?? 0) >= kapasitas) {
         throw new Error('Maaf, sesi ini baru saja penuh. Silakan pilih sesi lain.');
       }
-
 
       const { error: err } = await supabase
         .from('reservations')
@@ -431,6 +469,7 @@ const GymReservationPage = ({ onNavigate, user }) => {
 
       setConfirm(false);
       setSuccess(true);
+      fetchUserReservations();
     } catch (e) {
       setError(e.message || 'Terjadi kesalahan. Coba lagi.');
     } finally {
@@ -466,37 +505,124 @@ const GymReservationPage = ({ onNavigate, user }) => {
       </div>
 
       <div className="gr-scroll">
-        <Calendar
-          year={year} month={month} selectedDate={selDate}
-          onSelectDate={d => { setSelDate(d); setSelSess(null); setError(''); }}
-          onPrev={prevMonth} onNext={nextMonth}
-        />
-
-        <div className="gr-sess-section">
-          <div className="gr-sess-header">
-            <div className="gr-sess-bar" />
-            <h3 className="gr-sess-title">
-              Pilih Sesi
-              {selDate && !loadSess && sessions.length > 0 && (
-                <span className="gr-sess-date-hint"> · {fmtDate(year, month, selDate)}</span>
-              )}
-            </h3>
+        <div className="res-container">
+          
+          <div className="res-stats-box">
+            <div className="res-stat-item">
+              <div className="res-stat-ic"><IcCal size={18} /></div>
+              <span className="res-stat-label">TOTAL RESERVASI</span>
+              <span className="res-stat-value">{stats.total}</span>
+              <span className="res-stat-sub">Semua waktu</span>
+            </div>
+            <div className="res-stat-div" />
+            <div className="res-stat-item">
+              <div className="res-stat-ic"><IcCheckCircle size={18} /></div>
+              <span className="res-stat-label">SELESAI</span>
+              <span className="res-stat-value">{stats.completedCount}</span>
+              <span className="res-stat-sub">Reservasi</span>
+            </div>
+            <div className="res-stat-div" />
+            <div className="res-stat-item">
+              <div className="res-stat-ic"><IcClock size={18} /></div>
+              <span className="res-stat-label">AKAN DATANG</span>
+              <span className="res-stat-value">{stats.upcomingCount}</span>
+              <span className="res-stat-sub">Reservasi</span>
+            </div>
           </div>
-          <SessionList
-            selectedDate={selDate} sessions={sessions} loading={loadSess}
-            selectedSession={selSess}
-            onSelect={s => { setSelSess(s); setError(''); }}
-          />
+
+          <div className="res-layout-grid">
+            <div className="res-col-main">
+              <Calendar
+                year={year} month={month} selectedDate={selDate}
+                onSelectDate={d => { setSelDate(d); setSelSess(null); setError(''); }}
+                onPrev={prevMonth} onNext={nextMonth}
+                reservationMap={reservationMap}
+              />
+              <div className="gr-sess-section" style={{ marginTop: 20 }}>
+                <div className="gr-sess-header">
+                  <div className="gr-sess-bar" />
+                  <h3 className="gr-sess-title">
+                    Pilih Sesi
+                    {selDate && !loadSess && sessions.length > 0 && (
+                      <span className="gr-sess-date-hint"> · {fmtDate(year, month, selDate)}</span>
+                    )}
+                  </h3>
+                </div>
+                <SessionList
+                  selectedDate={selDate} sessions={sessions} loading={loadSess}
+                  selectedSession={selSess}
+                  onSelect={s => { setSelSess(s); setError(''); }}
+                />
+                {error && <div className="gr-error">{error}</div>}
+                {selDate && (
+                  <button
+                    className="gr-btn-primary gr-btn-full"
+                    disabled={!selDate || !selSess}
+                    style={{ marginTop: 10 }}
+                    onClick={() => { setError(''); setConfirm(true); }}>
+                    Lanjut Reservasi
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="res-col-side">
+              <div className="res-section">
+                <div className="res-sec-head">
+                  <h3 className="res-sec-title">Akan Datang</h3>
+                  <button className="res-sec-link" onClick={() => onNavigate('riwayat-reservasi')}>Lihat semua</button>
+                </div>
+                <div className="res-list-container">
+                  {stats.upcomingList.length > 0 ? stats.upcomingList.slice(0, 3).map(r => (
+                    <div key={r.id} className="res-list-card">
+                      <div className="res-list-date upcoming">
+                        <span className="res-list-d">{parseInt(r.date.split('-')[2])}</span>
+                        <span className="res-list-m">{MONTHS_ID[parseInt(r.date.split('-')[1])-1].slice(0,3)}</span>
+                      </div>
+                      <div className="res-list-info">
+                        <span className="res-list-time">{fmtTime(r.start_time)}</span>
+                        <span className="res-list-name">{r.notes || r.gym_name}</span>
+                      </div>
+                      <div className="res-list-action">
+                        <div className="res-list-icon"><IcClock size={16} /></div>
+                        <IcChevR />
+                      </div>
+                    </div>
+                  )) : (
+                    <p style={{fontSize: 12, color: 'var(--t3)', margin: 0, padding: 12}}>Belum ada jadwal upcoming</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="res-section">
+                <div className="res-sec-head">
+                  <h3 className="res-sec-title">Riwayat Terakhir</h3>
+                  <button className="res-sec-link" onClick={() => onNavigate('riwayat-reservasi')}>Lihat semua</button>
+                </div>
+                <div className="res-list-container">
+                  {stats.historyList.length > 0 ? stats.historyList.slice(0, 3).map(r => (
+                    <div key={r.id} className="res-list-card">
+                      <div className="res-list-date history">
+                        <span className="res-list-d">{parseInt(r.date.split('-')[2])}</span>
+                        <span className="res-list-m">{MONTHS_ID[parseInt(r.date.split('-')[1])-1].slice(0,3)}</span>
+                      </div>
+                      <div className="res-list-info">
+                        <span className="res-list-time">{fmtTime(r.start_time)}</span>
+                        <span className="res-list-name">{r.notes || r.gym_name}</span>
+                      </div>
+                      <div className="res-list-action">
+                        <div className="res-badge-selesai">Selesai</div>
+                        <IcChevR />
+                      </div>
+                    </div>
+                  )) : (
+                    <p style={{fontSize: 12, color: 'var(--t3)', margin: 0, padding: 12}}>Belum ada riwayat</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-
-        {error && <div className="gr-error">{error}</div>}
-
-        <button
-          className="gr-btn-primary gr-btn-full"
-          disabled={!selDate || !selSess}
-          onClick={() => { setError(''); setConfirm(true); }}>
-          Lanjut Reservasi
-        </button>
       </div>
     </div>
   );

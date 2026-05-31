@@ -211,6 +211,7 @@ const SignupPage = ({ onNavigate }) => {
         {error && <p className="auth-error" role="alert">{error}</p>}
 
         <div className="auth-fields">
+          <label className="auth-label">Email</label>
           <input
             className="auth-input"
             type="email"
@@ -221,6 +222,7 @@ const SignupPage = ({ onNavigate }) => {
             autoComplete="email"
             autoFocus
           />
+          <label className="auth-label">Password</label>
           <div className="auth-password-wrapper">
             <input
               className="auth-input"
@@ -237,6 +239,7 @@ const SignupPage = ({ onNavigate }) => {
               <EyeIcon open={showPassword}/>
             </button>
           </div>
+          <label className="auth-label">Konfirmasi Password</label>
           <div className="auth-password-wrapper">
             <input
               className="auth-input"

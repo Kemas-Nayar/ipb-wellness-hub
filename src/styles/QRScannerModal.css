@@ -1,0 +1,183 @@
+/* QR Scanner Modal CSS */
+.qr-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  padding: 20px;
+}
+
+.qr-modal-content {
+  background: #FFF;
+  width: 100%;
+  max-width: 400px;
+  border-radius: 24px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  animation: qr-slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes qr-slide-up {
+  from { opacity: 0; transform: translateY(40px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.qr-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #E5E7EB;
+  background: #FAFAFA;
+}
+
+.qr-modal-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.qr-modal-close {
+  background: none;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6B7280;
+  transition: background 0.2s, color 0.2s;
+}
+.qr-modal-close:hover {
+  background: #F3F4F6;
+  color: #111827;
+}
+
+.qr-modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.qr-scanner-container {
+  width: 100%;
+  max-width: 300px;
+  aspect-ratio: 1;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #000;
+  position: relative;
+  box-shadow: inset 0 0 0 2px rgba(200, 16, 46, 0.3);
+}
+
+/* Html5Qrcode injects its own elements, we need to style them */
+#qr-reader {
+  width: 100%;
+  height: 100%;
+  border: none !important;
+}
+#qr-reader video {
+  object-fit: cover !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+#qr-reader__dashboard_section_csr span {
+  display: none !important; /* Hide weird lib texts */
+}
+#qr-reader__scan_region {
+  height: 100% !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#qr-reader__dashboard_section_swaplink {
+  display: none !important;
+}
+
+.qr-scan-guidance {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  color: #4B5563;
+  text-align: center;
+  margin-top: 16px;
+  line-height: 1.5;
+}
+
+/* SUCCESS / ERROR STATES */
+.qr-state-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px 0;
+  gap: 12px;
+  width: 100%;
+}
+
+.qr-icon-success {
+  color: #10B981;
+  background: #D1FAE5;
+  padding: 16px;
+  border-radius: 50%;
+}
+.qr-icon-error {
+  color: #EF4444;
+  background: #FEE2E2;
+  padding: 16px;
+  border-radius: 50%;
+}
+
+.qr-state-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+.qr-state-desc {
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  color: #6B7280;
+  margin: 0 0 16px;
+}
+
+.qr-state-btn {
+  background: #C8102E;
+  color: #FFF;
+  border: none;
+  border-radius: 30px;
+  padding: 12px 24px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.qr-state-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(200, 16, 46, 0.2);
+}
+
+.qr-state-btn.secondary {
+  background: #F3F4F6;
+  color: #374151;
+}
+.qr-state-btn.secondary:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}

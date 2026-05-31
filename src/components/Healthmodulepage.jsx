@@ -268,11 +268,11 @@ const DetailPage = memo(({ category, onBack, onOpenDetail, progress, onWatchVide
   );
 });
 
-// Cache Supabase hasil fetch (session-level, bukan per-render)
-let cachedReservations = null;
-let cachedProgressData = null;
 
 const HealthModulePage = ({ onNavigate, user }) => {
+  const cachedReservationsRef = useRef(null);
+  const cachedProgressDataRef = useRef(null);
+
   const [reservationCount, setReservationCount] = useState({ total: 0, thisWeek: 0 });
   const [progress, setProgress]     = useState(loadLocalProgress);
   const [activeDetail, setActiveDetail] = useState(null);
@@ -280,6 +280,10 @@ const HealthModulePage = ({ onNavigate, user }) => {
   const [loading, setLoading]           = useState(true);
 
   useEffect(() => {
+    // Invalidate caches when user changes to prevent cross-user pollution
+    cachedReservationsRef.current = null;
+    cachedProgressDataRef.current = null;
+
     if (!user) {
       setProgress(loadLocalProgress());
       setLoading(false);
@@ -289,28 +293,30 @@ const HealthModulePage = ({ onNavigate, user }) => {
     const fetchAll = async () => {
       const weekStart = getWeekStart();
 
-            if (!cachedReservations) {
+      if (!cachedReservationsRef.current) {
         const { data } = await supabase
           .from('reservations')
           .select('id, date')
           .eq('user_id', user.id);
-        cachedReservations = data || [];
+        cachedReservationsRef.current = data || [];
       }
-      const thisWeek = cachedReservations.filter(r => r.date && r.date >= weekStart);
-      setReservationCount({ total: cachedReservations.length, thisWeek: thisWeek.length });
+      const reservations = cachedReservationsRef.current;
+      const thisWeek = reservations.filter(r => r.date && r.date >= weekStart);
+      setReservationCount({ total: reservations.length, thisWeek: thisWeek.length });
 
-            if (!cachedProgressData) {
+      if (!cachedProgressDataRef.current) {
         const { data, error } = await supabase
           .from('user_video_progress')
           .select('video_id, progress, last_watched')
           .eq('pengguna_id', user.id);
 
-        if (!error) cachedProgressData = data || [];
+        if (!error) cachedProgressDataRef.current = data || [];
       }
 
-      if (cachedProgressData !== null) {
+      const progressData = cachedProgressDataRef.current;
+      if (progressData !== null) {
         const progressMap = {};
-        cachedProgressData.forEach(row => {
+        progressData.forEach(row => {
           progressMap[row.video_id] = { progress: row.progress, lastWatched: row.last_watched };
         });
         setProgress(progressMap);
@@ -334,7 +340,7 @@ const HealthModulePage = ({ onNavigate, user }) => {
     };
   }, [progress]);
 
-    const handleWatchVideo = useCallback((videoId) => {
+  const handleWatchVideo = useCallback((videoId) => {
     if (!videoId) return;
     setActiveVideo(videoId);
   }, []);
@@ -350,7 +356,7 @@ const HealthModulePage = ({ onNavigate, user }) => {
       };
       setProgress(updated);
       saveLocalProgress(updated);
-      cachedProgressData = null; // invalidate cache
+      cachedProgressDataRef.current = null; // invalidate cache
 
       if (user) {
         await supabase.from('user_video_progress').upsert({
@@ -372,7 +378,7 @@ const HealthModulePage = ({ onNavigate, user }) => {
     };
     setProgress(updated);
     saveLocalProgress(updated);
-    cachedProgressData = null; // invalidate cache
+    cachedProgressDataRef.current = null; // invalidate cache
 
     if (user) {
       await supabase.from('user_video_progress').upsert({
@@ -426,21 +432,27 @@ const HealthModulePage = ({ onNavigate, user }) => {
         <div className="hm-stats-card">
           <div className="hm-stats-row">
             <div className="hm-stat hm-stat-red">
-              <span className="hm-stat-icon">🔥</span>
+              <span className="hm-stat-icon" style={{ background: '#FFF0F0', color: '#C8102E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C8 6 6 10 6 14a6 6 0 0012 0c0-3-1.5-6-3-8-1 2-1.5 3-1.5 4s-.5 2-1.5 2"/></svg>
+              </span>
               <div>
                 <p className="hm-stat-label">Total Gym</p>
                 <p className="hm-stat-value">{padTwo(reservationCount.total)} sesi</p>
               </div>
             </div>
-            <div className="hm-stat hm-stat-blue">
-              <span className="hm-stat-icon">📅</span>
+            <div className="hm-stat hm-stat-red">
+              <span className="hm-stat-icon" style={{ background: '#FFF0F0', color: '#C8102E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              </span>
               <div>
                 <p className="hm-stat-label">Minggu Ini</p>
                 <p className="hm-stat-value">{padTwo(reservationCount.thisWeek)} sesi</p>
               </div>
             </div>
-            <div className="hm-stat hm-stat-yellow">
-              <span className="hm-stat-icon">🎬</span>
+            <div className="hm-stat hm-stat-red">
+              <span className="hm-stat-icon" style={{ background: '#FFF0F0', color: '#C8102E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+              </span>
               <div>
                 <p className="hm-stat-label-sm">Video Selesai</p>
                 <p className="hm-stat-value">{completedCount}/{TOTAL_VIDEOS}</p>
@@ -452,7 +464,7 @@ const HealthModulePage = ({ onNavigate, user }) => {
             <div className="hm-weekly-row">
               <span className="hm-weekly-label">Progress Modul</span>
               <span className="hm-weekly-left">
-                {videoLeft > 0 ? `${videoLeft} video lagi` : 'Semua selesai! 🎉'}
+                {videoLeft > 0 ? `${videoLeft} video lagi` : 'Semua selesai!'}
               </span>
             </div>
             <div className="hm-progress-track">

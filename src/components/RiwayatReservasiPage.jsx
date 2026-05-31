@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../supabase';
+import QRScannerModal from './QRScannerModal';
 import '../styles/RiwayatReservasiPage.css';
 
 const IconBack = () => (
@@ -128,6 +129,7 @@ const RiwayatReservasiPage = ({ onNavigate, onBack, fromPage = 'profile', user, 
   const [page,      setPage]            = useState(1);
   const [hasMore,   setHasMore]         = useState(false);
   const [now,       setNow]             = useState(() => new Date());
+  const [showScannerId, setShowScannerId] = useState(null);
   const loaderRef                       = useRef(null);
 
   useEffect(() => {
@@ -319,7 +321,7 @@ const RiwayatReservasiPage = ({ onNavigate, onBack, fromPage = 'profile', user, 
                         /* Belum checkin, masih bisa — tombol QR */
                         <button
                           className="riwayat-checkin-btn"
-                          onClick={() => onNavigate('qr-scan', { reservationId: r.id })}
+                          onClick={() => setShowScannerId(r.id)}
                           title="Scan QR untuk check-in"
                           aria-label={`Check-in untuk reservasi ${r.gym_name || 'Gym'}`}
                         >
@@ -339,6 +341,17 @@ const RiwayatReservasiPage = ({ onNavigate, onBack, fromPage = 'profile', user, 
             )}
           </div>
         </>
+      )}
+
+      {showScannerId && (
+        <QRScannerModal
+          reservationId={showScannerId}
+          onClose={() => setShowScannerId(null)}
+          onSuccess={() => {
+            setShowScannerId(null);
+            fetchPage(1, true); // Refresh list to show checkmark
+          }}
+        />
       )}
     </div>
   );

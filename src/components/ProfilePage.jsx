@@ -61,10 +61,10 @@ const IcEdit = () => (
 );
 
 const MENU_ITEMS = [
-  { Icon: IcUser,     label: 'Informasi Pribadi', page: 'personal-info', color: '#4F46E5' },
-  { Icon: IcCalendar, label: 'Riwayat Reservasi', page: 'riwayat-reservasi', color: '#0891B2' },
-  { Icon: IcHelp,     label: 'FAQ & Help Center', page: 'faq', color: '#D97706' },
-  { Icon: IcSettings, label: 'Pengaturan',         page: 'pengaturan', color: '#6B7280' },
+  { Icon: IcUser,     label: 'Informasi Pribadi', page: 'personal-info', color: '#C8102E' },
+  { Icon: IcCalendar, label: 'Riwayat Reservasi', page: 'riwayat-reservasi', color: '#C8102E' },
+  { Icon: IcHelp,     label: 'FAQ & Help Center', page: 'faq', color: '#C8102E' },
+  { Icon: IcSettings, label: 'Pengaturan',         page: 'pengaturan', color: '#C8102E' },
 ];
 
 const ProfilePage = ({ onNavigate, user }) => {
@@ -212,8 +212,8 @@ const ProfilePage = ({ onNavigate, user }) => {
       {/* Ganti Akun */}
       <div className="pp-menu-group">
         <button className="pp-menu-item" onClick={() => onNavigate('ganti-akun')}>
-          <div className="pp-menu-icon-wrap" style={{ background: '#0891B218' }}>
-            <span style={{ color: '#0891B2' }}><IcSwitch /></span>
+          <div className="pp-menu-icon-wrap" style={{ background: '#C8102E18' }}>
+            <span style={{ color: '#C8102E' }}><IcSwitch /></span>
           </div>
           <span className="pp-menu-label">Ganti Akun</span>
           <IcChevron />

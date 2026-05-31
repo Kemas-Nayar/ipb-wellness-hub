@@ -24,9 +24,9 @@ const TIPS = [
 ];
 
 const FEATURE_CARDS = [
-  { key: 'health-assistant', label: 'AI Health Assistant', desc: 'Tanya soal kesehatan, nutrisi, dan program latihanmu kapan saja', color: '#2F5DAA', lightBg: '#EEF3FF', logo: healthAssistantLogo },
+  { key: 'health-assistant', label: 'AI Health Assistant', desc: 'Tanya soal kesehatan, nutrisi, dan program latihanmu kapan saja', color: '#C8102E', lightBg: '#FFF0F0', logo: healthAssistantLogo },
   { key: 'gym-reservation',  label: 'Gym Reservation',     desc: 'Reservasi sesi gym favoritmu dengan mudah dan cepat',             color: '#C8102E', lightBg: '#FFF0F0', logo: gymReservationLogo  },
-  { key: 'health-module',    label: 'Health Module',        desc: 'Akses video edukasi kesehatan dan wellness terkurasi',             color: '#1A9E5C', lightBg: '#EDFFF5', logo: healthModuleLogo    },
+  { key: 'health-module',    label: 'Health Module',       desc: 'Akses video edukasi kesehatan dan wellness terkurasi',            color: '#C8102E', lightBg: '#FFF0F0', logo: healthModuleLogo    },
 ];
 
 // ─────────────────────────────────────────────
@@ -139,11 +139,11 @@ const IcRefresh  = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="n
 const IcExternalLink = () => <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>;
 
 const tipIcons = {
-  water:     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2F5DAA" strokeWidth="2" strokeLinecap="round"><path d="M12 2C6 8 4 13 4 16a8 8 0 0016 0c0-3-2-8-8-14z"/></svg>,
-  sleep:     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>,
-  nutrition: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A9E5C" strokeWidth="2" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+  water:     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C8102E" strokeWidth="2" strokeLinecap="round"><path d="M12 2C6 8 4 13 4 16a8 8 0 0016 0c0-3-2-8-8-14z"/></svg>,
+  sleep:     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C8102E" strokeWidth="2" strokeLinecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>,
+  nutrition: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C8102E" strokeWidth="2" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
 };
-const tipIconBg = { water: '#EEF3FF', sleep: '#F3F0FF', nutrition: '#EDFFF5' };
+const tipIconBg = { water: '#FFF0F0', sleep: '#FFF0F0', nutrition: '#FFF0F0' };
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
@@ -217,7 +217,7 @@ const LangTabs = ({ value, onChange }) => (
         className={`news-lang-tab${value === lang ? ' news-lang-tab--active' : ''}`}
         onClick={() => onChange(lang)}
       >
-        {lang === 'ID' ? '🇮🇩 ID' : lang === 'EN' ? '🇬🇧 EN' : 'Semua'}
+        {lang === 'ID' ? 'ID' : lang === 'EN' ? 'EN' : 'Semua'}
       </button>
     ))}
   </div>
@@ -276,7 +276,7 @@ const NewsSection = ({ className = '' }) => {
         </div>
       ) : (
         <div className="news-list">
-          {filtered.slice(0, 8).map(article => (
+          {filtered.slice(0, 3).map(article => (
             <NewsCard
               key={article.id}
               article={article}
@@ -482,7 +482,7 @@ const HomePage = ({ onNavigate, user, refreshKey = 0 }) => {
       >
         <div className="stats-row">
           <div className="home-stat-item">
-            <div className="stat-icon-wrap" style={{ background: '#FFF8E1' }}><IcFire /></div>
+            <div className="stat-icon-wrap" style={{ background: '#FFF0F0' }}><IcFire /></div>
             <div>
               <p className="home-stat-value">{loading ? '—' : gymStreak}</p>
               <p className="home-stat-label">Day Streak</p>
@@ -496,7 +496,7 @@ const HomePage = ({ onNavigate, user, refreshKey = 0 }) => {
             </div>
           </div>
           <div className="home-stat-item">
-            <div className="stat-icon-wrap" style={{ background: '#EEF3FF' }}><IcClock /></div>
+            <div className="stat-icon-wrap" style={{ background: '#FFF0F0' }}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#C8102E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></div>
             <div>
               <p className="home-stat-value">{loading ? '—' : `${totalDurationHrs}j`}</p>
               <p className="home-stat-label">Durasi</p>
@@ -540,50 +540,28 @@ const HomePage = ({ onNavigate, user, refreshKey = 0 }) => {
       <p className="section-label">Ringkasan</p>
       <div className="home-cards">
 
-        {/* BMI */}
-        {bmi && bmiInfo && (
-          <div className="home-card card-wide bmi-card" style={{ background: bmiInfo.bg, borderColor: 'transparent' }}>
-            <div className="bmi-left">
-              <p className="bmi-label">Body Mass Index</p>
-              <div className="bmi-value-row">
-                <span className="bmi-number" style={{ color: bmiInfo.color }}>{bmi}</span>
-                <span className="bmi-unit">kg/m²</span>
-              </div>
-              <span className="bmi-status" style={{ background: bmiInfo.color }}>{bmiInfo.label}</span>
-              <p className="bmi-detail">{profile?.berat_kg} kg · {profile?.tinggi_cm} cm</p>
-            </div>
-            <div className="bmi-gauge-wrap">
-              <div className="bmi-gauge-bar">
-                <div className="bmi-gauge-fill" style={{ width: `${Math.min(Math.max((parseFloat(bmi) - 10) / 30 * 100, 5), 95)}%`, background: bmiInfo.color }} />
-                <div className="bmi-gauge-thumb" style={{ left: `${Math.min(Math.max((parseFloat(bmi) - 10) / 30 * 100, 5), 95)}%`, background: bmiInfo.color }} />
-              </div>
-              <div className="bmi-gauge-labels"><span>Kurus</span><span>Normal</span><span>Gemuk</span></div>
-            </div>
-          </div>
-        )}
-
         {/* Aktivitas Latihan */}
-        <div className="home-card card-wide">
+        <div className="home-card">
           <div className="card-header-row">
             <h3 className="card-title red">Aktivitas Latihan</h3>
             <span className="score-badge">{activityData[activityData.length - 1]?.activity ?? 10} pts</span>
           </div>
           {loading ? (
-            <div className="skeleton" style={{ height: 120, borderRadius: 12 }} />
+            <div className="skeleton" style={{ height: 90, borderRadius: 12, marginTop: 10 }} />
           ) : hasActivity ? (
             <>
-              <ResponsiveContainer width="100%" height={120}>
+              <ResponsiveContainer width="100%" height={90}>
                 <LineChart data={activityData} margin={{ top: 6, right: 6, left: -22, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f9f9f9" vertical={false} />
                   <XAxis dataKey="date" tick={{ fontSize: 9, fill: '#ccc', fontFamily: 'Poppins' }} axisLine={false} tickLine={false} interval={2} />
-                  <YAxis tick={{ fontSize: 9, fill: '#ccc', fontFamily: 'Poppins' }} axisLine={false} tickLine={false} domain={[0, 100]} />
+                  <YAxis tick={{ fontSize: 9, fill: '#ccc', fontFamily: 'Poppins' }} axisLine={false} tickLine={false} domain={['dataMin', 'dataMax + 20']} hide />
                   <Tooltip content={<CustomTooltip />} />
-                  <Line type="monotone" dataKey="activity" stroke="#E6A800" strokeWidth={2.5} dot={false} activeDot={{ r: 4, fill: '#E6A800', strokeWidth: 0 }} isAnimationActive={true} animationDuration={800} />
+                  <Line type="monotone" dataKey="activity" stroke="var(--blue)" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: 'var(--blue)', strokeWidth: 0 }} isAnimationActive={true} animationDuration={800} />
                 </LineChart>
               </ResponsiveContainer>
               <div className="chart-legend">
-                <span className="chart-legend-dot" />
-                <span className="chart-legend-text">Skor naik setiap reservasi gym</span>
+                <span className="chart-legend-dot" style={{ background: 'var(--blue)' }} />
+                <span className="chart-legend-text">Tren rutinitas</span>
               </div>
             </>
           ) : (
@@ -596,14 +574,11 @@ const HomePage = ({ onNavigate, user, refreshKey = 0 }) => {
           )}
         </div>
 
-        {/* ── ROW: Reservasiku + Video Progress ── */}
         {/*
-          FIX: Kedua card half-width sekarang dibungkus dalam satu baris
-          agar tingginya bisa diselaraskan dengan align-items: stretch.
-          Ini menggantikan card-half yang sebelumnya floating bebas di grid
-          dan menyebabkan kolom kanan kosong.
+          FIX: Removed compact-grid wrapper so these cards join the main home-cards grid,
+          creating a perfect 2x2 layout on desktop without stretching.
         */}
-        <div className="home-card card-half">
+        <div className="home-card">
           <h3 className="card-title red">Reservasiku</h3>
           {loading ? (
             <>
@@ -631,14 +606,13 @@ const HomePage = ({ onNavigate, user, refreshKey = 0 }) => {
             </>
           ) : (
             <div className="reservation-empty">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ddd" strokeWidth="1.5"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>
               <p className="empty-state">Belum ada reservasi</p>
               <button className="reservation-btn" onClick={() => onNavigate('gym-reservation')}>+ Buat Reservasi</button>
             </div>
           )}
         </div>
 
-        <div className="home-card card-half">
+        <div className="home-card">
           <h3 className="card-title red">Video Selesai</h3>
           <div className="video-progress-circle-wrap">
             <svg width="68" height="68" viewBox="0 0 68 68">
@@ -660,20 +634,13 @@ const HomePage = ({ onNavigate, user, refreshKey = 0 }) => {
         </div>
 
         {/*
-          FIX: Tips Sehat dipindah ke card-wide (full-width) agar tidak
-          ada area kosong di kolom kanan. Sebelumnya Tips = card-half
-          tapi tidak ada pasangannya di kolom kanan → grid menggantung.
+          TIPS: 3 columns inline to save space
         */}
-        <div className="home-card card-wide">
-          <h3 className="card-title red">Tips Sehat</h3>
-          {/*
-            FIX: Layout tips diubah dari kolom vertikal menjadi grid 3 kolom
-            agar memanfaatkan lebar penuh card-wide dengan rapi.
-          */}
-          <div className="tips-grid">
+        <div className="home-card card-wide" style={{ padding: '8px 12px' }}>
+          <div className="tips-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px' }}>
             {TIPS.map(tip => (
-              <div className="tips-item-inline" key={tip.id}>
-                <div className="tips-icon-inline" style={{ background: tipIconBg[tip.icon] }}>{tipIcons[tip.icon]}</div>
+              <div className="tips-item-inline" key={tip.id} style={{ padding: '4px', border: 'none', background: 'transparent' }}>
+                <div className="tips-icon-inline" style={{ background: tipIconBg[tip.icon], width: 24, height: 24 }}>{tipIcons[tip.icon]}</div>
                 <div>
                   <p className="tips-item-title">{tip.title}</p>
                   <p className="tips-item-text">{tip.text}</p>
@@ -685,15 +652,8 @@ const HomePage = ({ onNavigate, user, refreshKey = 0 }) => {
 
       </div>
 
-      {/* ── NEWS SECTION — di luar home-cards agar tidak terikat grid 2-kolom ── */}
-      {/*
-        FIX: NewsSection dipindah ke luar .home-cards.
-        Sebelumnya NewsSection ada di dalam grid 2-kolom, tapi tanpa
-        class card-wide yang benar sehingga hanya mengisi 1 kolom.
-        Sekarang ia berdiri sendiri dengan padding yang sama (0 16px).
-      */}
-      <p className="section-label">Berita Terkini</p>
-      <div style={{ padding: '0 16px 16px' }}>
+      {/* ── NEWS SECTION ── */}
+      <div style={{ padding: '0 16px 16px', marginTop: '16px' }}>
         <NewsSection />
       </div>
 

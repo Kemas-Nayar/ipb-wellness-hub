@@ -9,6 +9,14 @@ import iconGizi        from '../assets/icon_gizi.png';
 import iconKonsultasi  from '../assets/icon_konsultasi.png';
 import iconMonitoring  from '../assets/icon_monitoring.png';
 
+/*  Sub-components  */
+
+const IcStar = ({ fill = '#E6A800', stroke = '#E6A800' }) => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill={fill} stroke={stroke} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: 2}}>
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+  </svg>
+);
+
 /*  Data  */
 
 const BADGES = [
@@ -19,8 +27,8 @@ const BADGES = [
 
 const STATS = [
   { number: '200+', label: 'Member Aktif' },
-  { number: '4.9★', label: 'Rating Pengguna' },
-  { number: '5 bln',  label: 'Rata-rata Hasil' },
+  { number: <><span style={{marginRight: 4}}>4.9</span><IcStar fill="#E6A800" /></>, label: 'Rating Pengguna' },
+  { number: '4 mgg',  label: 'Rata-rata Hasil' },
 ];
 
 const FEATURES = [
@@ -73,7 +81,7 @@ const TESTIMONIALS = [
 const FAQ = [
   {
     q: 'Apakah pendaftaran gratis?',
-    a: 'Ya, pendaftaran dan akses fitur dasar sepenuhnya gratis. Fitur premium tersedia dengan berlangganan.',
+    a: 'Ya, pendaftaran dan seluruh akses fitur IPB Wellness Hub sepenuhnya gratis tanpa biaya berlangganan.',
   },
   {
     q: 'Apakah harus sivitas IPB untuk mendaftar?',
@@ -89,11 +97,11 @@ const FAQ = [
   },
 ];
 
-/*  Sub-components  */
-
 const StarRating = ({ count }) => (
-  <span className="lp-stars" aria-label={`${count} dari 5 bintang`}>
-    {'★'.repeat(count)}{'☆'.repeat(5 - count)}
+  <span className="lp-stars" aria-label={`${count} dari 5 bintang`} style={{ display: 'flex', alignItems: 'center' }}>
+    {Array.from({ length: 5 }).map((_, i) => (
+      <IcStar key={i} fill={i < count ? '#E6A800' : 'none'} stroke={i < count ? '#E6A800' : '#ddd'} />
+    ))}
   </span>
 );
 
@@ -220,14 +228,14 @@ const LandingPage = ({ onNavigate }) => {
             </span>
 
             <h1 id="hero-title" className="lp-hero-title">
-              Be Healthy,<br />
-              Get wealthy with <br />
-              <span className="lp-hero-title-accent">IPB Wellness Hub</span>
+              Wujudkan Target<br />
+              Kebugaranmu dengan <br />
+              <span className="lp-hero-title-accent">Panduan AI Personal</span>
             </h1>
 
             <p className="lp-hero-desc">
-              Program latihan dan gizi terintegrasi dengan
-              Artificial Intelligence (AI) dan teknologi terkini.
+              Mulai dari tracking gizi hingga program latihan spesifik.
+              IPB Wellness Hub merancang pola hidup sehat yang disesuaikan secara presisi dengan tubuh Anda.
             </p>
 
             <div className="lp-hero-actions">

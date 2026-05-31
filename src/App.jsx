@@ -50,7 +50,6 @@ const LogoutPage           = lazy(() => import("./components/LogoutPage"));
 const HealthAssistantPage  = lazy(() => import("./components/Healthassistantpage"));
 const HealthModulePage     = lazy(() => import("./components/Healthmodulepage"));
 const GymReservationPage   = lazy(() => import("./components/Gymreservationpage"));
-const QRScanPage           = lazy(() => import("./components/QRScanPage"));
 const AdminDashboard       = lazy(() => import("./components/AdminDashboard"));
 
 // ─────────────────────────────────────────────
@@ -59,8 +58,8 @@ const AdminDashboard       = lazy(() => import("./components/AdminDashboard"));
 const PUBLIC_PAGES    = ['landing', 'login', 'signup', 'forgot', 'reset-password'];
 
 // Halaman transient: tidak disimpan ke localStorage karena tidak masuk akal
-// untuk di-restore setelah reload (sesi kamera/QR sudah mati).
-const TRANSIENT_PAGES = ['qr-scan'];
+// untuk di-restore setelah reload.
+const TRANSIENT_PAGES = [];
 
 const PageLoader = () => (
   <div style={{ minHeight:'100vh', display:'flex', alignItems:'center',
@@ -332,6 +331,7 @@ export default function App() {
             restoredFromStorage.current = false;
             setPage('landing');
             localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem('hm_progress');
             break;
 
           case 'TOKEN_REFRESHED':
@@ -396,7 +396,6 @@ export default function App() {
 
             {page === 'gym-reservation'   && <GymReservationPage   onNavigate={handleNavigate} user={user} onBookingSuccess={handleBookingSuccess}/>}
 
-            {page === 'qr-scan'           && <QRScanPage           onNavigate={handleNavigate} user={user} params={pageParams} onCheckinSuccess={handleCheckinSuccess}/>}
             {page === 'admin'             && <AdminDashboard       onNavigate={handleNavigate} user={user}/>}
           </div>
         </Suspense>

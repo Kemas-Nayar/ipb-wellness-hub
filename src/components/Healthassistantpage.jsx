@@ -5,7 +5,7 @@ import '../styles/Healthassistantpage.css';
 const WELCOME = {
   id: 'welcome-message',
   role: 'assistant',
-  content: 'Halo! Aku Nuri, Health Assistant dari IPB Wellness Hub 👋\nApa yang mau kamu tanyakan tentang kesehatan, gizi, atau olahraga hari ini?',
+  content: 'Halo! Aku Nuri, Health Assistant dari IPB Wellness Hub\nApa yang mau kamu tanyakan tentang kesehatan, gizi, atau olahraga hari ini?',
 };
 
 const SYSTEM_PROMPT = `Kamu adalah Health Assistant bernama Nuri dari IPB Wellness Hub. 
@@ -15,10 +15,22 @@ Jangan memberikan diagnosis medis. Jika pertanyaan tidak berhubungan dengan kese
 tolak dengan sopan dan arahkan kembali ke topik kesehatan.`;
 
 const QUICK_TOPICS = [
-  { label: '🍒 Tips Diet',  prompt: 'Berikan tips diet sehat untuk saya' },
-  { label: '💪 Latihan',    prompt: 'Berikan rekomendasi latihan olahraga yang baik untuk pemula' },
-  { label: '💤 Tidur',      prompt: 'Bagaimana cara meningkatkan kualitas tidur saya?' },
-  { label: '💧 Hidrasi',    prompt: 'Berapa banyak air yang harus saya minum setiap hari?' },
+  { 
+    label: <span style={{display: 'flex', alignItems: 'center', gap: 6}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Tips Diet</span>,
+    prompt: 'Berikan tips diet sehat untuk saya' 
+  },
+  { 
+    label: <span style={{display: 'flex', alignItems: 'center', gap: 6}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h11M6.5 17.5h11M6 6v12M18 6v12M3 9v6M21 9v6"/></svg> Latihan</span>,
+    prompt: 'Berikan rekomendasi latihan olahraga yang baik untuk pemula' 
+  },
+  { 
+    label: <span style={{display: 'flex', alignItems: 'center', gap: 6}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> Tidur</span>,
+    prompt: 'Bagaimana cara meningkatkan kualitas tidur saya?' 
+  },
+  { 
+    label: <span style={{display: 'flex', alignItems: 'center', gap: 6}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> Hidrasi</span>,
+    prompt: 'Berapa banyak air yang harus saya minum setiap hari?' 
+  },
 ];
 
 const IconBack = () => (
@@ -102,8 +114,9 @@ const Sidebar = ({ onSend, isLoading, onClear }) => (
 
     {/* Tips */}
     <div className="ha-sidebar-tips">
-      <p className="ha-sidebar-tips-text">
-        💡 <strong>Tips:</strong> Nuri siap menjawab pertanyaan seputar kesehatan, gizi, dan olahraga dalam Bahasa Indonesia.
+      <p className="ha-sidebar-tips-text" style={{display: 'flex', gap: 8, alignItems: 'flex-start'}}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E6A800" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink: 0, marginTop: 2}}><path d="M9 21h6M12 2a7 7 0 0 0-7 7c0 2 1 4 2 5v2a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-2c1-1 2-3 2-5a7 7 0 0 0-7-7z"/></svg>
+        <span><strong>Tips:</strong> Nuri siap menjawab pertanyaan seputar kesehatan, gizi, dan olahraga dalam Bahasa Indonesia.</span>
       </p>
     </div>
 
