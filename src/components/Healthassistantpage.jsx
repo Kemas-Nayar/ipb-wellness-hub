@@ -99,7 +99,7 @@ const getBmiLabel = (bmi) => {
 // ─── Quick topic chips ────────────────────────────────────────────────────────
 const QUICK_TOPICS = [
   {
-    label: <span style={{display: 'flex', alignItems: 'center', gap: 6}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Tips Diet</span>,
+    label: <span style={{display: 'flex', alignItems: 'center', gap: 6}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3c.6-1 2-1.5 3.5-1-.1 1.5-.9 2.5-2 3C12.5 5.5 12 4.5 12 3z"/><path d="M8 7C5 7 3 10 3 13c0 5 3 10 6 10 1.2 0 2-.6 3-.6s1.8.6 3 .6c3 0 6-5 6-10 0-3-2-6-5-6-1.5 0-2.5.6-3.5.6S9.5 7 8 7z"/></svg> Tips Diet</span>,
     prompt: 'Berikan tips diet sehat untuk saya'
   },
   {
