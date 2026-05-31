@@ -142,7 +142,7 @@ const Calendar = ({ year, month, selectedDate, onSelectDate, onPrev, onNext, res
 };
 
 
-const SessionList = ({ selectedDate, sessions, loading, selectedSession, onSelect }) => {
+const SessionList = ({ year, month, selectedDate, sessions, loading, selectedSession, onSelect }) => {
   if (!selectedDate) return (
     <div className="gr-empty">
       <IcCal size={28} />
@@ -158,6 +158,9 @@ const SessionList = ({ selectedDate, sessions, loading, selectedSession, onSelec
     </div>
   );
 
+  const today = new Date();
+  const isToday = selectedDate === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+
   return (
     <div className="gr-sess-list">
       {sessions.map(s => {
@@ -167,9 +170,20 @@ const SessionList = ({ selectedDate, sessions, loading, selectedSession, onSelec
         const penuh     = sisa <= 0;
         const sel       = selectedSession?.id === s.id;
 
+        // Check if session has already passed on the same day
+        let isPastTime = false;
+        if (isToday && s.jam_mulai) {
+          const [hours, minutes] = s.jam_mulai.split(':').map(Number);
+          const sessionTime = new Date();
+          sessionTime.setHours(hours, minutes, 0, 0);
+          isPastTime = today > sessionTime;
+        }
+
+        const disabled = penuh || isPastTime;
+
         return (
-          <button key={s.id} disabled={penuh} onClick={() => onSelect(s)}
-            className={['gr-sess', sel ? 'gr-sess--sel' : '', penuh ? 'gr-sess--full' : ''].filter(Boolean).join(' ')}>
+          <button key={s.id} disabled={disabled} onClick={() => onSelect(s)}
+            className={['gr-sess', sel ? 'gr-sess--sel' : '', penuh || isPastTime ? 'gr-sess--full' : ''].filter(Boolean).join(' ')}>
             <div className="gr-sess-left">
               <div className="gr-sess-time-row">
                 <IcClock />
@@ -178,7 +192,9 @@ const SessionList = ({ selectedDate, sessions, loading, selectedSession, onSelec
               <span className="gr-sess-name">{s.nama_sesi || 'Sesi Gym'}</span>
             </div>
             <div className="gr-sess-right">
-              {penuh ? (
+              {isPastTime ? (
+                <span className="gr-badge gr-badge--full" style={{ background: '#e0e0e0', color: '#888' }}>Sudah Lewat</span>
+              ) : penuh ? (
                 <span className="gr-badge gr-badge--full">Penuh</span>
               ) : (
                 <>
@@ -405,7 +421,7 @@ const GymReservationPage = ({ onNavigate, user }) => {
       .channel(`reservations-${dateStr}`)
       .on(
         'postgres_changes',
-        { schema: 'public', table:  'reservations', filter: `date=eq.${dateStr}` },
+        { schema: 'public', table: 'reservations' },
         () => { loadSessions(year, month, selDate); fetchUserReservations(); }
       )
       .subscribe();
@@ -548,11 +564,11 @@ const GymReservationPage = ({ onNavigate, user }) => {
                     )}
                   </h3>
                 </div>
-                <SessionList
-                  selectedDate={selDate} sessions={sessions} loading={loadSess}
-                  selectedSession={selSess}
-                  onSelect={s => { setSelSess(s); setError(''); }}
-                />
+                 <SessionList
+                   year={year} month={month} selectedDate={selDate} sessions={sessions} loading={loadSess}
+                   selectedSession={selSess}
+                   onSelect={s => { setSelSess(s); setError(''); }}
+                 />
                 {error && <div className="gr-error">{error}</div>}
                 {selDate && (
                   <button

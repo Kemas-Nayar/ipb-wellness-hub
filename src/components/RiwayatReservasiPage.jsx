@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../supabase';
 import QRScannerModal from './QRScannerModal';
+import { useToast } from './Toast';
 import '../styles/RiwayatReservasiPage.css';
 
 const IconBack = () => (
@@ -121,6 +122,7 @@ const FilterBar = ({ activeFilter, onChange }) => (
 );
 
 const RiwayatReservasiPage = ({ onNavigate, onBack, fromPage = 'profile', user, refreshTrigger }) => {
+  const toast = useToast();
   const [reservations, setReservations] = useState([]);
   const [loading,   setLoading]         = useState(true);
   const [refreshing, setRefreshing]     = useState(false);
@@ -130,6 +132,7 @@ const RiwayatReservasiPage = ({ onNavigate, onBack, fromPage = 'profile', user, 
   const [hasMore,   setHasMore]         = useState(false);
   const [now,       setNow]             = useState(() => new Date());
   const [showScannerId, setShowScannerId] = useState(null);
+  const [cancelReservation, setCancelReservation] = useState(null);
   const loaderRef                       = useRef(null);
 
   useEffect(() => {
@@ -197,6 +200,20 @@ const RiwayatReservasiPage = ({ onNavigate, onBack, fromPage = 'profile', user, 
       .subscribe();
     return () => supabase.removeChannel(channel);
   }, [user?.id]);
+
+  const confirmCancel = async (id) => {
+    try {
+      const { error: err } = await supabase
+        .from('reservations')
+        .delete()
+        .eq('id', id);
+      if (err) throw err;
+      setReservations(prev => prev.filter(r => r.id !== id));
+      toast.success('Reservasi berhasil dibatalkan.');
+    } catch (e) {
+      toast.error('Gagal membatalkan reservasi: ' + e.message);
+    }
+  };
 
   const withStatus = reservations.map(r => ({ ...r, _status: computeStatus(r, now) }));
   const filtered   = filter === 'all' ? withStatus : withStatus.filter(r => r._status === filter);
@@ -318,15 +335,39 @@ const RiwayatReservasiPage = ({ onNavigate, onBack, fromPage = 'profile', user, 
                           <IconCheck />
                         </div>
                       ) : (
-                        /* Belum checkin, masih bisa — tombol QR */
-                        <button
-                          className="riwayat-checkin-btn"
-                          onClick={() => setShowScannerId(r.id)}
-                          title="Scan QR untuk check-in"
-                          aria-label={`Check-in untuk reservasi ${r.gym_name || 'Gym'}`}
-                        >
-                          <IconQR />
-                        </button>
+                        /* Belum checkin, masih bisa — tombol QR & Batal */
+                        <>
+                          <button
+                            className="riwayat-checkin-btn"
+                            onClick={() => setShowScannerId(r.id)}
+                            title="Scan QR untuk check-in"
+                            aria-label={`Check-in untuk reservasi ${r.gym_name || 'Gym'}`}
+                          >
+                            <IconQR />
+                          </button>
+                          <button
+                            onClick={() => setCancelReservation(r)}
+                            style={{
+                              marginTop: 8,
+                              background: '#FFE8EB',
+                              border: '1.5px solid #FFD0D6',
+                              color: '#C8102E',
+                              fontSize: 10,
+                              fontWeight: 700,
+                              fontFamily: "'Poppins', sans-serif",
+                              cursor: 'pointer',
+                              padding: '5px 8px',
+                              borderRadius: '10px',
+                              width: '100%',
+                              textAlign: 'center',
+                              whiteSpace: 'nowrap',
+                              transition: 'transform 0.1s, background 0.1s'
+                            }}
+                            title="Batalkan Sesi"
+                          >
+                            Batal Sesi
+                          </button>
+                        </>
                       )}
                     </div>
                   </article>
@@ -352,6 +393,107 @@ const RiwayatReservasiPage = ({ onNavigate, onBack, fromPage = 'profile', user, 
             fetchPage(1, true); // Refresh list to show checkmark
           }}
         />
+      )}
+
+      {cancelReservation && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.45)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10000,
+          padding: 20
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: 24,
+            padding: 24,
+            width: '100%',
+            maxWidth: 360,
+            boxShadow: '0 8px 30px rgba(0, 0, 0, 0.12)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center',
+          }}>
+            <div style={{
+              width: 56,
+              height: 56,
+              borderRadius: '50%',
+              background: '#FFE8EB',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: 16
+            }}>
+              <IconAlert />
+            </div>
+            <h3 style={{
+              fontSize: 18,
+              fontWeight: 700,
+              color: '#1a1a1a',
+              margin: '0 0 8px 0'
+            }}>Batalkan Sesi?</h3>
+            <p style={{
+              fontSize: 13,
+              color: '#666',
+              lineHeight: 1.5,
+              margin: '0 0 24px 0'
+            }}>
+              Apakah kamu yakin ingin membatalkan reservasi gym pada hari <strong>{parseLocal(cancelReservation.date).getDate()} {MONTHS[parseLocal(cancelReservation.date).getMonth()]}</strong> pukul <strong>{formatTime(cancelReservation.start_time)}</strong>?
+            </p>
+            <div style={{
+              display: 'flex',
+              gap: 12,
+              width: '100%'
+            }}>
+              <button
+                onClick={() => setCancelReservation(null)}
+                style={{
+                  flex: 1,
+                  padding: '12px 0',
+                  background: '#f5f5f5',
+                  border: 'none',
+                  borderRadius: 14,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: '#666',
+                  cursor: 'pointer',
+                  fontFamily: "'Poppins', sans-serif"
+                }}
+              >
+                Kembali
+              </button>
+              <button
+                onClick={() => {
+                  confirmCancel(cancelReservation.id);
+                  setCancelReservation(null);
+                }}
+                style={{
+                  flex: 1,
+                  padding: '12px 0',
+                  background: '#C8102E',
+                  border: 'none',
+                  borderRadius: 14,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: 'white',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(200, 16, 46, 0.2)',
+                  fontFamily: "'Poppins', sans-serif"
+                }}
+              >
+                Ya, Batalkan
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
