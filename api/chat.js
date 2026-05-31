@@ -1,22 +1,54 @@
-// File: api/chat.js
-import { streamText } from 'ai';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
+/**
+ * Vercel Serverless Function — /api/chat
+ *
+ * Acts as a secure proxy between the browser and the DeepSeek API.
+ * The DEEPSEEK_API_KEY environment variable lives only on the server —
+ * it is never bundled into the client JavaScript.
+ *
+ * Set this in: Vercel Dashboard → Project → Settings → Environment Variables
+ *   Name:  DEEPSEEK_API_KEY
+ *   Value: sk-your-key-here
+ */
+export default async function handler(req, res) {
+  // Only allow POST
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
-const google = createGoogleGenerativeAI({
-  apiKey: process.env.VITE_GEMINI_API_KEY || '',
-});
+  const apiKey = process.env.DEEPSEEK_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({
+      error: 'DEEPSEEK_API_KEY is not configured in Vercel Environment Variables.',
+    });
+  }
 
-// gunakan Web API handler
-export const runtime = 'edge';
+  try {
+    const { messages, model = 'deepseek-chat', max_tokens = 800, temperature = 0.7 } = req.body;
 
-export async function POST(req) {
-  const { messages } = await req.json();
+    if (!messages || !Array.isArray(messages)) {
+      return res.status(400).json({ error: 'messages array is required' });
+    }
 
-  const result = await streamText({
-    model: google('gemini-2.0-flash'),
-    messages,
-    system: 'Kamu adalah Health Assistant bernama Nuri dari IPB Wellness Hub...',
-  });
+    const upstream = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({ model, messages, max_tokens, temperature }),
+    });
 
-  return result.toDataStreamResponse();
+    const data = await upstream.json();
+
+    if (!upstream.ok) {
+      return res.status(upstream.status).json({
+        error: data?.error?.message ?? `DeepSeek error ${upstream.status}`,
+      });
+    }
+
+    return res.status(200).json(data);
+  } catch (err) {
+    console.error('[api/chat] error:', err.message);
+    return res.status(500).json({ error: 'Internal server error: ' + err.message });
+  }
 }

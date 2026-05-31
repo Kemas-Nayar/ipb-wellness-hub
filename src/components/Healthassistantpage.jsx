@@ -408,18 +408,31 @@ const HealthAssistantPage = ({ onNavigate, user }) => {
     const apiMessages = [{ role: 'system', content: systemPrompt }, ...history];
 
     try {
-      const apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY;
-      if (!apiKey) throw new Error('VITE_DEEPSEEK_API_KEY belum diset di file .env');
+      let res;
 
-      const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-        body: JSON.stringify({ model: 'deepseek-chat', messages: apiMessages, max_tokens: 800, temperature: 0.7 }),
-      });
+      if (import.meta.env.PROD) {
+        // ── PRODUCTION: call /api/chat (Vercel serverless) ──
+        // API key lives server-side only — never in the browser bundle
+        res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: apiMessages, model: 'deepseek-chat', max_tokens: 800, temperature: 0.7 }),
+        });
+      } else {
+        // ── LOCAL DEV: call DeepSeek directly ──
+        // Safe because the dev server is only accessible on your own machine
+        const apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY;
+        if (!apiKey) throw new Error('VITE_DEEPSEEK_API_KEY belum diset di file .env (hanya untuk dev lokal)');
+        res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+          body: JSON.stringify({ model: 'deepseek-chat', messages: apiMessages, max_tokens: 800, temperature: 0.7 }),
+        });
+      }
 
       if (!res.ok) {
         let errMsg = `HTTP ${res.status}`;
-        try { const e = await res.json(); errMsg = e?.error?.message || errMsg; } catch { /* ignore */ }
+        try { const e = await res.json(); errMsg = e?.error?.message || e?.error || errMsg; } catch { /* ignore */ }
         throw new Error(errMsg);
       }
 
