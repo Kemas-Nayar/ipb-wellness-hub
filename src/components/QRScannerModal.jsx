@@ -62,6 +62,7 @@ const QRScannerModal = ({ reservationId, onClose, onSuccess }) => {
     if (scanState === 'scanning') {
       import('html5-qrcode').then(({ Html5Qrcode }) => {
         html5QrCode = new Html5Qrcode("qr-reader");
+        let isProcessed = false;
         
         html5QrCode.start(
           { facingMode: "environment" },
@@ -71,11 +72,15 @@ const QRScannerModal = ({ reservationId, onClose, onSuccess }) => {
           },
           (decodedText) => {
             // Success Callback
-            if (html5QrCode.isScanning) {
-              html5QrCode.stop().then(() => {
-                handleQRCodeScan(decodedText);
-              });
-            }
+            if (isProcessed) return;
+            isProcessed = true;
+            
+            html5QrCode.stop().then(() => {
+              handleQRCodeScan(decodedText);
+            }).catch((err) => {
+              console.warn("Failed to stop scanner cleanly, processing anyway", err);
+              handleQRCodeScan(decodedText);
+            });
           },
           (errorMessage) => {
             // Ignore parse errors (happens every frame without a QR code)
