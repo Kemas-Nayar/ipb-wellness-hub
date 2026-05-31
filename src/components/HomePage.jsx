@@ -15,7 +15,7 @@ import '../styles/HomePage.css';
 // CONSTANTS
 // ─────────────────────────────────────────────
 
-const RESERVATION_FETCH_LIMIT = 200;
+const RESERVATION_FETCH_LIMIT = 50; // FIX: was 200 — streak/chart only need recent data
 
 const TIPS = [
   { id: 1, title: 'Stay Hydrated',    text: 'Minum minimal 8 gelas air sehari, terutama sebelum dan setelah olahraga.', icon: 'water' },
@@ -350,12 +350,31 @@ const HomePage = ({ onNavigate, user, refreshKey = 0 }) => {
       setLoading(true);
       setFetchError(null);
       try {
-        const { data: prof } = await supabase
-          .from('profiles')
-          .select('nama_lengkap, email, berat_kg, tinggi_cm, avatar_url')
-          .eq('id', user.id)
-          .single();
+        // FIX: Run all 3 queries in PARALLEL — they don't depend on each other
+        const [profResult, resResult, notifResult] = await Promise.all([
+          supabase
+            .from('profiles')
+            .select('nama_lengkap, email, berat_kg, tinggi_cm, avatar_url')
+            .eq('id', user.id)
+            .single(),
+          supabase
+            .from('reservations')
+            .select('id, date, start_time, end_time')
+            .eq('user_id', user.id)
+            .order('date',       { ascending: true })
+            .order('start_time', { ascending: true })
+            .limit(RESERVATION_FETCH_LIMIT),
+          supabase
+            .from('notifications')
+            .select('id', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('is_read', false),
+        ]);
+
         if (!ctrl.alive) return;
+
+        // Handle profile
+        const prof = profResult.data;
         if (prof) {
           let avatarUrl = prof.avatar_url;
           if (avatarUrl && !avatarUrl.startsWith('http')) {
@@ -368,16 +387,10 @@ const HomePage = ({ onNavigate, user, refreshKey = 0 }) => {
             setBmi((prof.berat_kg / (h * h)).toFixed(1));
           }
         }
-        const { data: res, error } = await supabase
-          .from('reservations')
-          .select('id, date, start_time, end_time')
-          .eq('user_id', user.id)
-          .order('date',       { ascending: true })
-          .order('start_time', { ascending: true })
-          .limit(RESERVATION_FETCH_LIMIT);
-        if (!ctrl.alive) return;
-        if (!error) {
-          const rows = res || [];
+
+        // Handle reservations
+        if (!resResult.error) {
+          const rows = resResult.data || [];
           setAllReservations(rows);
           const upcoming = rows.find(r => {
             if (!r.date || !r.end_time) return false;
@@ -385,19 +398,13 @@ const HomePage = ({ onNavigate, user, refreshKey = 0 }) => {
           });
           setNextReservation(upcoming || null);
         } else {
-          console.error('[HomePage] reservations fetch:', error.message);
+          console.error('[HomePage] reservations fetch:', resResult.error.message);
           setFetchError('Gagal memuat reservasi. Coba lagi.');
         }
 
-        // Fetch unread notifications count
-        if (user) {
-          const { count } = await supabase
-            .from('notifications')
-            .select('id', { count: 'exact', head: true })
-            .eq('user_id', user.id)
-            .eq('is_read', false);
-          if (ctrl.alive && count !== null) setUnreadCount(count);
-        }
+        // Handle notifications count
+        if (notifResult.count !== null) setUnreadCount(notifResult.count);
+
       } catch (err) {
         if (ctrl.alive) {
           console.error('[HomePage] unexpected error:', err);
@@ -410,6 +417,7 @@ const HomePage = ({ onNavigate, user, refreshKey = 0 }) => {
     run();
     return () => { ctrl.alive = false; };
   }, [user, refreshKey]);
+
 
   const firstName     = profile?.nama_lengkap?.split(' ')[0] || user?.email?.split('@')[0] || 'User';
   const avatarInitial = firstName.charAt(0).toUpperCase();

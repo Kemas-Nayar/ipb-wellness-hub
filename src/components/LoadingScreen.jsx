@@ -3,10 +3,10 @@ import logoNutrigym from "../assets/logo_nutrigym.png";
 import "../styles/LoadingScreen.css";
 
 // Durasi total loading screen:
-// - Progress bar: ~3 detik natural
-// - Fade out mulai: 2500ms (dipercepat dari 3000ms)
-// - Komponen hilang: 3500ms
-// - onFinish dipanggil: 3500ms + sedikit buffer
+// - Progress bar: ~1.5 detik natural
+// - Fade out mulai: 1200ms
+// - Komponen hilang: 1800ms
+// - onFinish dipanggil: 1800ms
 //
 // FIX: onFinish HARUS selalu terpanggil — tidak boleh macet karena
 // state transition yang gagal (misalnya animasi di-interrupt saat refresh).
@@ -35,41 +35,37 @@ export default function LoadingScreen({ onFinish }) {
   }, []);
 
   useEffect(() => {
-    // Progress bar — simulasi loading yang terasa natural
+    // Progress bar — simulasi loading yang terasa natural (lebih cepat)
     const progressInterval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 100) { clearInterval(progressInterval); return 100; }
-        const increment = prev < 60 ? 2 : prev < 85 ? 1 : 0.5;
+        const increment = prev < 60 ? 5 : prev < 85 ? 3 : 1;
         return Math.min(prev + increment, 100);
       });
     }, 20);
 
-    // Mulai fade out sedikit lebih cepat (2500ms bukan 3000ms)
-    // supaya total waktu lebih singkat dan tidak terasa lambat
-    const fadeTimer = setTimeout(() => setFading(true), 2500);
+    // Fade out mulai di 1200ms
+    const fadeTimer = setTimeout(() => setFading(true), 1200);
 
     // Sembunyikan komponen setelah fade selesai
-    const hideTimer = setTimeout(() => setVisible(false), 3500);
+    const hideTimer = setTimeout(() => setVisible(false), 1800);
 
-    // Panggil onFinish — ini trigger utama
-    // Dipanggil bersamaan dengan hide supaya tidak ada gap blank
+    // Panggil onFinish — trigger utama
     const finishTimer = setTimeout(() => {
       if (!finishCalledRef.current) {
         finishCalledRef.current = true;
         onFinishRef.current?.();
       }
-    }, 3500);
+    }, 1800);
 
-    // Fallback keras: kalau semua timer di atas entah kenapa tidak jalan
-    // (tab background throttling, browser freeze sesaat, dll),
-    // paksa onFinish setelah 6 detik
+    // Fallback keras jika browser throttle timer (tab background dll)
     const fallbackTimer = setTimeout(() => {
       if (!finishCalledRef.current) {
         finishCalledRef.current = true;
         console.warn('[LoadingScreen] fallback onFinish triggered');
         onFinishRef.current?.();
       }
-    }, 6000);
+    }, 3500);
 
     return () => {
       clearInterval(progressInterval);

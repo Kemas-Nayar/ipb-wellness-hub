@@ -42,13 +42,19 @@ const QRScannerModal = ({ reservationId, onClose, onSuccess }) => {
 
     try {
       // Process Check-in via Supabase
+      // FIX: was only updating updated_at — admin dashboard never saw "Hadir"
+      const now = new Date().toISOString();
       const { error } = await supabase
         .from('reservations')
-        .update({ updated_at: new Date().toISOString() })
+        .update({
+          status:         'checked-in',
+          checked_in_at:  now,
+          updated_at:     now,
+        })
         .eq('id', reservationId);
 
       if (error) throw error;
-      
+
       setScanState('success');
     } catch (err) {
       setErrorMsg("Gagal memproses check-in. " + err.message);

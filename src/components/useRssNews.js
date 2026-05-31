@@ -155,8 +155,28 @@ const fetchWithProxyRace = async (feed, outerSignal) => {
 };
 
 // ─────────────────────────────────────────────
-// HOOK
+// RSS CACHE (localStorage, 30 min TTL)
 // ─────────────────────────────────────────────
+
+const CACHE_KEY = 'rss_cache_v1';
+const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
+
+const readCache = () => {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const { ts, articles } = JSON.parse(raw);
+    if (Date.now() - ts > CACHE_TTL) return null; // expired
+    return articles;
+  } catch { return null; }
+};
+
+const writeCache = (articles) => {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), articles }));
+  } catch { /* storage full — ignore */ }
+};
+
 
 const useRssNews = () => {
   const [articles,   setArticles]   = useState([]);
@@ -179,6 +199,18 @@ const useRssNews = () => {
      */
     const timer = setTimeout(() => ctrl.abort(), 12_000);
 
+    // FIX: Check cache first — serve instantly if fresh, skip all network calls
+    const cached = fetchKey === 0 ? readCache() : null; // skip cache on manual refresh
+    if (cached) {
+      setArticles(cached);
+      setIsFallback(false);
+      setError(null);
+      setLoading(false);
+      alive = false; // don't run network fetch
+      clearTimeout(timer);
+      return;
+    }
+
     const run = async () => {
       setLoading(true);
       setError(null);
@@ -192,9 +224,11 @@ const useRssNews = () => {
 
         const all = results.flat();
         if (all.length > 0) {
-          setArticles(all.sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || '')));
+          const sorted = all.sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || ''));
+          setArticles(sorted);
           setIsFallback(false);
           setError(null);
+          writeCache(sorted); // FIX: save to cache for next visit
         } else {
           setArticles(FALLBACK_ARTICLES);
           setIsFallback(true);
@@ -213,6 +247,7 @@ const useRssNews = () => {
     run();
     return () => { alive = false; ctrl.abort(); clearTimeout(timer); };
   }, [fetchKey]);
+
 
   const filtered = langFilter === 'ALL'
     ? articles

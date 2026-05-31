@@ -118,7 +118,9 @@ export default function App() {
   const restoredFromStorage  = useRef(false);
   const isMountedRef         = useRef(true);
 
-  // ── FALLBACK: paksa appReady setelah 5 detik ────────────────────────────
+  // ── FALLBACK: paksa appReady setelah 2.5 detik ──────────────────────────
+  // Dikurangi dari 5s → 2.5s karena loading screen sekarang hanya 1.8s.
+  // Ini hanya safety net jika init() hang — seharusnya tidak pernah tercapai.
   useEffect(() => {
     if (IS_AUTH_CALLBACK) return;
     const t = setTimeout(() => {
@@ -126,7 +128,7 @@ export default function App() {
         console.warn('[App] appReady fallback triggered');
         setAppReady(true);
       }
-    }, 5000);
+    }, 2500);
     return () => clearTimeout(t);
   }, []);
 
@@ -275,7 +277,10 @@ export default function App() {
 
         if (session?.user) {
           setUser(session.user);
-          // allowSavedPage = true: restore halaman terakhir dari localStorage
+          // FIX: set appReady immediately after getSession — don't wait for
+          // profile fetch. navigateAfterAuth runs in background so the page
+          // appears right away while profile data loads separately.
+          if (isMountedRef.current) setAppReady(true);
           await navigateAfterAuth(session.user.id, true);
         } else {
           setProfile(null);
