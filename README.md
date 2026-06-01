@@ -24,7 +24,7 @@ Proyek Mata Kuliah KOM 1231 Rekayasa Perangkat Lunak (RPL) Semester Genap 2025/2
 |---------|-----------|
 | **Frontend** | Vite, React, JavaScript (59%), Tailwind CSS (37.6%) |
 | **Backend/Database** | Supabase (PostgreSQL), PLpgSQL (2.3%) |
-| **Deployment** | --- |
+| **Deployment** | Vercel |
 | **Additional** | Node.js, npm |
 
 ---
