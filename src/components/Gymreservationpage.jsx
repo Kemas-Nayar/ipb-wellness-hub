@@ -517,31 +517,21 @@ const GymReservationPage = ({ onNavigate, user }) => {
         throw new Error('Maaf, sesi ini baru saja penuh. Silakan pilih sesi lain.');
       }
 
-<<<<<<< HEAD
       // Insert ke reservasi (singular) untuk manajemen kapasitas
       const { error: errReservasi } = await supabase
         .from('reservasi')
         .insert({
-          pengguna_id: penggunaId,
-          sesi_id:     selSess.id,
-          status:      'menunggu',
-=======
-      // Insert reservation with pengguna_id from database
-      // FIX: Change status from 'menunggu' to 'dikonfirmasi' so it shows up immediately in Reservasiku
-      const { error: err } = await supabase
-        .from('reservasi')
-        .insert({
-          pengguna_id:    penggunaId,
-          sesi_id:        selSess.id,
-          status:         'dikonfirmasi',
+          pengguna_id:      penggunaId,
+          sesi_id:          selSess.id,
+          status:           'dikonfirmasi',
           waktu_konfirmasi: new Date().toISOString(),
->>>>>>> 7ce2c7e83718b2a997b61e2877435b6c87214af7
         });
 
       if (errReservasi) {
         if (errReservasi.code === '23505') throw new Error('Kamu sudah memiliki reservasi untuk sesi ini.');
         throw new Error(errReservasi.message);
       }
+
 
       // Juga insert ke reservations (plural) untuk riwayat — cek duplikat dulu
       const dateStr = toDateStr(year, month, selDate);
