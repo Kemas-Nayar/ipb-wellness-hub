@@ -503,12 +503,14 @@ const GymReservationPage = ({ onNavigate, user }) => {
       }
 
       // Insert reservation with pengguna_id from database
+      // FIX: Change status from 'menunggu' to 'dikonfirmasi' so it shows up immediately in Reservasiku
       const { error: err } = await supabase
         .from('reservasi')
         .insert({
           pengguna_id:    penggunaId,
           sesi_id:        selSess.id,
-          status:         'menunggu',
+          status:         'dikonfirmasi',
+          waktu_konfirmasi: new Date().toISOString(),
         });
 
       if (err) {
