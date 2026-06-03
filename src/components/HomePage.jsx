@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { supabase } from '../supabase';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip,
@@ -293,7 +293,7 @@ const NewsSection = ({ className = '' }) => {
 // ─────────────────────────────────────────────
 // COMPONENT
 // ─────────────────────────────────────────────
-const HomePage = ({ onNavigate, user, refreshKey = 0 }) => {
+const HomePage = ({ onNavigate, user, refreshKey = 0, silentRefreshKey = 0 }) => {
   const [profile,         setProfile]         = useState(null);
   const [allReservations, setAllReservations] = useState([]);
   const [nextReservation, setNextReservation] = useState(null);
@@ -343,80 +343,95 @@ const HomePage = ({ onNavigate, user, refreshKey = 0 }) => {
     };
   }, [nextReservation]);
 
-  useEffect(() => {
-    if (!user) { setLoading(false); return; }
+  // Helper: fetch semua data dan update state
+  // isSilent = true berarti tidak munculkan loading skeleton
+  // PENTING: dependency [user?.id] bukan [user] — object `user` berubah reference
+  // setiap token refresh meski user ID sama. Kalau pakai [user], fetchAllData
+  // akan recreate setiap refresh → useEffect re-run → setLoading(true) → blank!
+  const fetchAllData = useCallback(async (isSilent = false) => {
+    if (!user?.id) { if (!isSilent) setLoading(false); return; }
+    const userId = user.id; // capture ID saat callback dibuat
     const ctrl = { alive: true };
-    const run = async () => {
-      setLoading(true);
-      setFetchError(null);
-      try {
-        // FIX: Run all 3 queries in PARALLEL — they don't depend on each other
-        const [profResult, resResult, notifResult] = await Promise.all([
-          supabase
-            .from('profiles')
-            .select('nama_lengkap, email, berat_kg, tinggi_cm, avatar_url')
-            .eq('id', user.id)
-            .single(),
-          supabase
-            .from('reservations')
-            .select('id, date, start_time, end_time')
-            .eq('user_id', user.id)
-            .order('date',       { ascending: true })
-            .order('start_time', { ascending: true })
-            .limit(RESERVATION_FETCH_LIMIT),
-          supabase
-            .from('notifications')
-            .select('id', { count: 'exact', head: true })
-            .eq('user_id', user.id)
-            .eq('is_read', false),
-        ]);
 
-        if (!ctrl.alive) return;
+    if (!isSilent) setLoading(true);
+    setFetchError(null);
 
-        // Handle profile
-        const prof = profResult.data;
-        if (prof) {
-          let avatarUrl = prof.avatar_url;
-          if (avatarUrl && !avatarUrl.startsWith('http')) {
-            const { data: u } = supabase.storage.from('avatars').getPublicUrl(avatarUrl);
-            avatarUrl = u?.publicUrl || null;
-          }
-          setProfile({ ...prof, avatar_url: avatarUrl });
-          if (prof.berat_kg && prof.tinggi_cm) {
-            const h = prof.tinggi_cm / 100;
-            setBmi((prof.berat_kg / (h * h)).toFixed(1));
-          }
+    try {
+      const [profResult, resResult, notifResult] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('nama_lengkap, email, berat_kg, tinggi_cm, avatar_url')
+          .eq('id', userId)
+          .single(),
+        supabase
+          .from('reservations')
+          .select('id, date, start_time, end_time')
+          .eq('user_id', userId)
+          .order('date',       { ascending: true })
+          .order('start_time', { ascending: true })
+          .limit(RESERVATION_FETCH_LIMIT),
+        supabase
+          .from('notifications')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', userId)
+          .eq('is_read', false),
+      ]);
+
+      if (!ctrl.alive) return;
+
+      // Handle profile
+      const prof = profResult.data;
+      if (prof) {
+        let avatarUrl = prof.avatar_url;
+        if (avatarUrl && !avatarUrl.startsWith('http')) {
+          const { data: u } = supabase.storage.from('avatars').getPublicUrl(avatarUrl);
+          avatarUrl = u?.publicUrl || null;
         }
-
-        // Handle reservations
-        if (!resResult.error) {
-          const rows = resResult.data || [];
-          setAllReservations(rows);
-          const upcoming = rows.find(r => {
-            if (!r.date || !r.end_time) return false;
-            return new Date(`${r.date}T${r.end_time}`) >= new Date();
-          });
-          setNextReservation(upcoming || null);
-        } else {
-          console.error('[HomePage] reservations fetch:', resResult.error.message);
-          setFetchError('Gagal memuat reservasi. Coba lagi.');
+        setProfile({ ...prof, avatar_url: avatarUrl });
+        if (prof.berat_kg && prof.tinggi_cm) {
+          const h = prof.tinggi_cm / 100;
+          setBmi((prof.berat_kg / (h * h)).toFixed(1));
         }
-
-        // Handle notifications count
-        if (notifResult.count !== null) setUnreadCount(notifResult.count);
-
-      } catch (err) {
-        if (ctrl.alive) {
-          console.error('[HomePage] unexpected error:', err);
-          setFetchError('Terjadi kesalahan. Periksa koneksi dan coba lagi.');
-        }
-      } finally {
-        if (ctrl.alive) setLoading(false);
       }
-    };
-    run();
-    return () => { ctrl.alive = false; };
-  }, [user, refreshKey]);
+
+      // Handle reservations
+      if (!resResult.error) {
+        const rows = resResult.data || [];
+        setAllReservations(rows);
+        const upcoming = rows.find(r => {
+          if (!r.date || !r.end_time) return false;
+          return new Date(`${r.date}T${r.end_time}`) >= new Date();
+        });
+        setNextReservation(upcoming || null);
+      } else {
+        console.error('[HomePage] reservations fetch:', resResult.error.message);
+        if (!isSilent) setFetchError('Gagal memuat reservasi. Coba lagi.');
+      }
+
+      // Handle notifications count
+      if (notifResult.count !== null) setUnreadCount(notifResult.count);
+
+    } catch (err) {
+      if (ctrl.alive && !isSilent) {
+        console.error('[HomePage] unexpected error:', err);
+        setFetchError('Terjadi kesalahan. Periksa koneksi dan coba lagi.');
+      }
+    } finally {
+      if (ctrl.alive) setLoading(false);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]); // <— hanya ID, bukan object user
+
+  // Fetch awal / forced refresh (booking baru, dll) — tampilkan loading
+  useEffect(() => {
+    fetchAllData(false);
+  }, [fetchAllData, refreshKey]);
+
+  // Silent refresh saat balik dari tab lain — data lama tetap tampil
+  useEffect(() => {
+    if (silentRefreshKey === 0) return; // skip mount
+    fetchAllData(true);
+  }, [silentRefreshKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
   const firstName     = profile?.nama_lengkap?.split(' ')[0] || user?.email?.split('@')[0] || 'User';

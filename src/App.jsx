@@ -102,7 +102,10 @@ export default function App() {
   const [pageParams,  setPageParams]  = useState({});
   const [biodataTemp, setBiodataTemp] = useState(null);
   const [refreshKey,        setRefreshKey]        = useState(0);
+  const [silentRefreshKey,  setSilentRefreshKey]  = useState(0);
   const [checkinRefreshKey, setCheckinRefreshKey] = useState(0);
+  // Track when tab was last hidden — used for 60s cooldown on re-fetch
+  const lastHiddenAtRef = useRef(0);
 
   const [page, setPage] = useState(() => {
     if (IS_AUTH_CALLBACK && AUTH_URL.type === 'recovery') return 'reset-password';
@@ -340,7 +343,16 @@ export default function App() {
             break;
 
           case 'TOKEN_REFRESHED':
-            if (session?.user) setUser(session.user);
+            // PENTING: hanya update user kalau ID-nya berubah.
+            // Token refresh menciptakan object `user` BARU (reference baru)
+            // meski user ID sama — kalau kita setUser() tanpa guard ini,
+            // HomePage akan re-render dan setLoading(true) setiap token refresh.
+            if (session?.user) {
+              setUser(prev => {
+                if (prev?.id === session.user.id) return prev; // sama, skip re-render
+                return session.user;
+              });
+            }
             break;
 
           default:
@@ -356,12 +368,29 @@ export default function App() {
   }, [navigateAfterAuth]);
 
   // ── VISIBILITY CHANGE — re-validasi session saat user balik ke tab ────────
-  // Browser bisa membekukan WebSocket Supabase Realtime saat tab di-background.
-  // Handler ini memastikan: (1) session masih valid, (2) data di-refresh ulang.
+  // Dua perbaikan dari versi sebelumnya:
+  // 1. Cooldown 60 detik: tab cuma hilang sebentar (<60s) tidak trigger re-fetch
+  //    sama sekali — menghindari flicker/skeleton untuk switch tab cepat.
+  // 2. silentRefreshKey: HomePage re-fetch data di background TANPA
+  //    menghilangkan data yang sudah tampil (tidak setLoading(true)).
+  //    User tetap melihat data lama sampai data baru siap.
   useEffect(() => {
+    const REFETCH_COOLDOWN_MS = 60_000; // 60 detik
+
     const handleVisibility = async () => {
-      if (document.visibilityState !== 'visible') return;
       if (!isMountedRef.current) return;
+
+      if (document.visibilityState === 'hidden') {
+        // Catat kapan tab mulai di-background
+        lastHiddenAtRef.current = Date.now();
+        return;
+      }
+
+      // Tab kembali visible
+      const hiddenDuration = Date.now() - lastHiddenAtRef.current;
+
+      // Kalau tab cuma hilang sebentar (<60s), tidak perlu re-fetch
+      if (hiddenDuration < REFETCH_COOLDOWN_MS) return;
 
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -373,10 +402,10 @@ export default function App() {
         }
 
         if (session?.user) {
-          // Session masih valid — update user state dan bump refreshKey
-          // agar semua komponen yang bergantung data Supabase re-fetch.
+          // Session valid — update user dan trigger SILENT re-fetch
+          // (data lama tetap tampil, data baru dimuat di background)
           setUser(session.user);
-          setRefreshKey(k => k + 1);
+          setSilentRefreshKey(k => k + 1);
         } else {
           // Session benar-benar expired — paksa ke landing
           console.info('[App] visibilitychange: session expired, redirecting to landing');
@@ -405,42 +434,58 @@ export default function App() {
     <ErrorBoundary>
       <ToastProvider>
         <Suspense fallback={<PageLoader />}>
-          <div className="main-content">
-            {page === 'landing'           && <LandingPage          onNavigate={handleNavigate}/>}
-            {page === 'login'             && <LoginPage            onNavigate={handleNavigate}/>}
-            {page === 'signup'            && <SignupPage           onNavigate={handleNavigate}/>}
-            {page === 'forgot'            && <ForgotPasswordPage   onNavigate={handleNavigate}/>}
-            {page === 'reset-password'    && <ResetPasswordPage    onNavigate={handleNavigate}/>}
-
-            {page === 'home'              && <HomePage             onNavigate={handleNavigate} user={user} refreshKey={refreshKey}/>}
-
-            {page === 'biodata'           && <BiodataPage          onNavigate={handleNavigate} user={user} initialData={biodataTemp}/>}
-            {page === 'confirm'           && <ConfirmPage          onNavigate={handleNavigate} biodata={biodataTemp}/>}
-            {page === 'notifications'     && <NotificationsPage    onNavigate={handleNavigate}/>}
-            {page === 'profile'           && <ProfilePage          onNavigate={handleNavigate} user={user}/>}
-            {page === 'personal-info'     && <PersonalInfoPage     onNavigate={handleNavigate} user={user}/>}
-
-            {page === 'riwayat-reservasi' && <RiwayatReservasiPage onNavigate={handleNavigate} user={user} refreshTrigger={checkinRefreshKey} fromPage={pageParams.fromPage ?? 'profile'}/>}
-
-            {page === 'faq'               && <FAQPage              onNavigate={handleNavigate}/>}
-            {page === 'pengaturan'        && <PengaturanPage       onNavigate={handleNavigate}/>}
-
-            {page === 'ganti-akun'        && (
-              <GantiAkunPage
-                onNavigate={handleNavigate}
-                user={user}
-                profile={profile}
-                onSwitchAccount={handleSwitchAccount}
-              />
+          {/* ── HOME (selalu mounted, disembunyikan dengan CSS saat tidak aktif) ──
+              Ini mencegah unmount/remount setiap navigasi ke halaman lain
+              sehingga data streak, reservasi, BMI tidak hilang dan tidak
+              perlu loading ulang saat user balik ke dashboard. */}
+          <div style={{ display: page === 'home' ? '' : 'none', minHeight: '100%' }}>
+            {user && (
+              <Suspense fallback={<PageLoader />}>
+                <HomePage
+                  onNavigate={handleNavigate}
+                  user={user}
+                  refreshKey={refreshKey}
+                  silentRefreshKey={silentRefreshKey}
+                />
+              </Suspense>
             )}
+          </div>
 
-            {page === 'logout'            && <LogoutPage           onNavigate={handleNavigate}/>}
-            {page === 'health-assistant'  && <HealthAssistantPage  onNavigate={handleNavigate} user={user}/>}
-            {page === 'health-module'     && <HealthModulePage     onNavigate={handleNavigate} user={user}/>}
+          {/* ── HALAMAN LAIN (conditional render biasa) ── */}
+          <div style={{ display: page === 'home' ? 'none' : '' }}>
+            <Suspense fallback={<PageLoader />}>
+              {page === 'landing'           && <LandingPage          onNavigate={handleNavigate}/>}
+              {page === 'login'             && <LoginPage            onNavigate={handleNavigate}/>}
+              {page === 'signup'            && <SignupPage           onNavigate={handleNavigate}/>}
+              {page === 'forgot'            && <ForgotPasswordPage   onNavigate={handleNavigate}/>}
+              {page === 'reset-password'    && <ResetPasswordPage    onNavigate={handleNavigate}/>}
 
-            {page === 'gym-reservation'   && <GymReservationPage   onNavigate={handleNavigate} user={user} onBookingSuccess={handleBookingSuccess}/>}
+              {page === 'biodata'           && <BiodataPage          onNavigate={handleNavigate} user={user} initialData={biodataTemp}/>}
+              {page === 'confirm'           && <ConfirmPage          onNavigate={handleNavigate} biodata={biodataTemp}/>}
+              {page === 'notifications'     && <NotificationsPage    onNavigate={handleNavigate}/>}
+              {page === 'profile'           && <ProfilePage          onNavigate={handleNavigate} user={user}/>}
+              {page === 'personal-info'     && <PersonalInfoPage     onNavigate={handleNavigate} user={user}/>}
 
-            {page === 'admin'             && <AdminDashboard       onNavigate={handleNavigate} user={user}/>}
+              {page === 'riwayat-reservasi' && <RiwayatReservasiPage onNavigate={handleNavigate} user={user} refreshTrigger={checkinRefreshKey} fromPage={pageParams.fromPage ?? 'profile'}/>}
+
+              {page === 'faq'               && <FAQPage              onNavigate={handleNavigate}/>}
+              {page === 'pengaturan'        && <PengaturanPage       onNavigate={handleNavigate}/>}
+
+              {page === 'ganti-akun'        && (
+                <GantiAkunPage
+                  onNavigate={handleNavigate}
+                  user={user}
+                  profile={profile}
+                  onSwitchAccount={handleSwitchAccount}
+                />
+              )}
+
+              {page === 'logout'            && <LogoutPage           onNavigate={handleNavigate}/>}
+              {page === 'health-assistant'  && <HealthAssistantPage  onNavigate={handleNavigate} user={user}/>}
+              {page === 'health-module'     && <HealthModulePage     onNavigate={handleNavigate} user={user}/>}
+              {page === 'gym-reservation'   && <GymReservationPage   onNavigate={handleNavigate} user={user} onBookingSuccess={handleBookingSuccess}/>}
+              {page === 'admin'             && <AdminDashboard       onNavigate={handleNavigate} user={user}/>}
+            </Suspense>
           </div>
         </Suspense>
       </ToastProvider>
