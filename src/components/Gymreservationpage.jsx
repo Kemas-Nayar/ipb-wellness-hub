@@ -25,6 +25,15 @@ const fmtDate        = (y, m, d) => {
   return `${['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][date.getDay()]}, ${d} ${MONTHS_ID[m]} ${y}`;
 };
 
+const computeStatus = (r, now = new Date()) => {
+  if (!r.date || !r.start_time || !r.end_time) return 'upcoming';
+  const resStart = new Date(`${r.date}T${r.start_time}`);
+  const resEnd   = new Date(`${r.date}T${r.end_time}`);
+  if (now >= resStart && now <= resEnd) return 'berlangsung';
+  if (now > resEnd)                     return 'selesai';
+  return 'upcoming';
+};
+
 // Icons
 const IcArrow = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -359,38 +368,55 @@ const GymReservationPage = ({ onNavigate, user }) => {
   const [loadingRes, setLoadingRes] = useState(true);
   const [penggunaId, setPenggunaId] = useState(null);
 
-  // Fetch pengguna ID from pengguna table using auth user email
+  // Fetch pengguna ID from pengguna table
   const fetchPenggunaId = useCallback(async () => {
-    if (!user?.email) return;
+    if (!user?.id) return;
     try {
-      const { data } = await supabase
+      // 1. Try querying by UUID id first (best practice for new users and trigger sync)
+      const { data: byId } = await supabase
         .from('pengguna')
         .select('id')
-        .eq('email', user.email)
-        .single();
-      if (data?.id) {
-        setPenggunaId(data.id);
-      } else {
-        console.warn('[GymReservation] Pengguna tidak ditemukan di database');
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (byId?.id) {
+        setPenggunaId(byId.id);
+        return;
       }
+
+      // 2. If not found by ID (e.g. legacy user with different UUID in pengguna), try by email case-insensitive
+      if (user.email) {
+        const { data: byEmail } = await supabase
+          .from('pengguna')
+          .select('id')
+          .ilike('email', user.email.trim())
+          .maybeSingle();
+
+        if (byEmail?.id) {
+          setPenggunaId(byEmail.id);
+          return;
+        }
+      }
+
+      console.warn('[GymReservation] Pengguna tidak ditemukan di database untuk ID:', user.id, 'atau email:', user.email);
     } catch (err) {
       console.error('[GymReservation] Error fetching pengguna:', err);
     }
-  }, [user?.email]);
+  }, [user?.id, user?.email]);
 
   const fetchUserReservations = useCallback(async () => {
-    if (!penggunaId) return;
+    if (!user?.id) return;
     setLoadingRes(true);
-    // Fetch reservasi with joined sesi_gym data
+    // Fetch reservations (plural) for the logged-in user
     const { data } = await supabase
-      .from('reservasi')
-      .select('id, sesi_id, status, waktu_reservasi, sesi_gym(tanggal, jam_mulai, jam_selesai, nama_sesi)')
-      .eq('pengguna_id', penggunaId)
-      .order('waktu_reservasi', { ascending: false });
+      .from('reservations')
+      .select('id, date, start_time, end_time, gym_name, status, created_at')
+      .eq('user_id', user.id)
+      .order('date', { ascending: false });
     
     setUserReservations(data || []);
     setLoadingRes(false);
-  }, [penggunaId]);
+  }, [user?.id]);
 
   // Fetch pengguna ID on mount
   useEffect(() => {
@@ -402,26 +428,27 @@ const GymReservationPage = ({ onNavigate, user }) => {
     fetchUserReservations();
   }, [fetchUserReservations]);
 
-  const todayDateStr = toDateStr(today.getFullYear(), today.getMonth(), today.getDate());
-
   const stats = useMemo(() => {
+    const now = new Date();
     const total = userReservations.length;
-    const upcoming = userReservations.filter(r => r.sesi_gym?.tanggal >= todayDateStr);
-    const completed = userReservations.filter(r => r.sesi_gym?.tanggal < todayDateStr);
-    
+    const withStatus = userReservations.map(r => ({ ...r, _status: computeStatus(r, now) }));
+
+    const upcoming = withStatus.filter(r => r._status === 'upcoming' || r._status === 'berlangsung');
+    const completed = withStatus.filter(r => r._status === 'selesai');
+
     return {
       total,
       upcomingCount: upcoming.length,
       completedCount: completed.length,
-      upcomingList: upcoming.sort((a,b) => (a.sesi_gym?.tanggal || '').localeCompare(b.sesi_gym?.tanggal || '')),
+      upcomingList: upcoming.sort((a,b) => (a.date || '').localeCompare(b.date || '')),
       historyList: completed
     };
-  }, [userReservations, todayDateStr]);
+  }, [userReservations]);
 
   const reservationMap = useMemo(() => {
     const map = {};
     userReservations.forEach(r => {
-      const date = r.sesi_gym?.tanggal;
+      const date = r.date;
       if (date) {
         map[date] = (map[date] || 0) + 1;
       }
@@ -449,19 +476,23 @@ const GymReservationPage = ({ onNavigate, user }) => {
 
   // Realtime subscription
   useEffect(() => {
-    if (!selDate) return;
+    if (!selDate || !user?.id) return;
     const dateStr = toDateStr(year, month, selDate);
     const channel = supabase
       .channel(`reservasi-${dateStr}`)
       .on(
         'postgres_changes',
         { schema: 'public', table: 'reservasi' },
-        { schema: 'public', table: 'reservations' },
-        () => { loadSessions(year, month, selDate); fetchUserReservations(); }
+        () => { loadSessions(year, month, selDate); }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'reservations', filter: `user_id=eq.${user.id}` },
+        () => { fetchUserReservations(); }
       )
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [selDate, year, month, loadSessions, fetchUserReservations]);
+  }, [selDate, year, month, user?.id, loadSessions, fetchUserReservations]);
 
   // Month navigation
   const prevMonth = () => {
@@ -476,21 +507,24 @@ const GymReservationPage = ({ onNavigate, user }) => {
   };
 
   const handleConfirm = async () => {
-    if (!selDate || !selSess || !penggunaId) return;
+    if (!selDate || !selSess) return;
     setBusy(true); setError('');
 
     try {
-      // Check if user already has a reservation for this session
+      const dateStr = toDateStr(year, month, selDate);
+
+      // 1. Check if user already has a reservation for this slot in reservations (plural) table
       const { data: existing } = await supabase
-        .from('reservasi')
+        .from('reservations')
         .select('id')
-        .eq('pengguna_id', penggunaId)
-        .eq('sesi_id', selSess.id)
+        .eq('user_id', user.id)
+        .eq('date', dateStr)
+        .eq('start_time', selSess.jam_mulai)
         .maybeSingle();
 
       if (existing) throw new Error('Kamu sudah memiliki reservasi untuk sesi ini.');
 
-      // Check capacity
+      // 2. Check capacity in reservasi (singular) table
       const { count: currentCount } = await supabase
         .from('reservasi')
         .select('id', { count: 'exact', head: true })
@@ -502,18 +536,38 @@ const GymReservationPage = ({ onNavigate, user }) => {
         throw new Error('Maaf, sesi ini baru saja penuh. Silakan pilih sesi lain.');
       }
 
-      // Insert reservation with pengguna_id from database
-      const { error: err } = await supabase
-        .from('reservasi')
+      // 3. Write booking to reservations (plural) table (core table used by history pages)
+      const { error: errPlural } = await supabase
+        .from('reservations')
         .insert({
-          pengguna_id:    penggunaId,
-          sesi_id:        selSess.id,
-          status:         'menunggu',
+          user_id: user.id,
+          date: dateStr,
+          start_time: selSess.jam_mulai,
+          end_time: selSess.jam_selesai,
+          gym_name: selSess.nama_sesi || 'Sesi Gym',
+          status: 'upcoming'
         });
 
-      if (err) {
-        if (err.code === '23505') throw new Error('Kamu sudah memiliki reservasi untuk sesi ini.');
-        throw new Error(err.message);
+      if (errPlural) throw new Error(errPlural.message);
+
+      // 4. Optionally write to reservasi (singular) table if penggunaId exists in database
+      if (penggunaId) {
+        try {
+          const { error: errSingular } = await supabase
+            .from('reservasi')
+            .insert({
+              pengguna_id:    penggunaId,
+              sesi_id:        selSess.id,
+              status:         'dikonfirmasi',
+            });
+          if (errSingular) {
+            console.warn('[GymReservation] Failed to write to reservasi table (capacity sync):', errSingular.message);
+          }
+        } catch (syncErr) {
+          console.warn('[GymReservation] Syncing with reservasi table failed:', syncErr);
+        }
+      } else {
+        console.warn('[GymReservation] Skipping capacity sync write to reservasi (singular) because penggunaId is missing in database.');
       }
 
       setConfirm(false);
@@ -625,12 +679,12 @@ const GymReservationPage = ({ onNavigate, user }) => {
                   {stats.upcomingList.length > 0 ? stats.upcomingList.slice(0, 3).map(r => (
                     <div key={r.id} className="res-list-card" onClick={() => onNavigate('riwayat-reservasi')}>
                       <div className="res-list-date upcoming">
-                        <span className="res-list-d">{parseInt(r.sesi_gym?.tanggal?.split('-')[2] || '0')}</span>
-                        <span className="res-list-m">{MONTHS_ID[parseInt(r.sesi_gym?.tanggal?.split('-')[1] || '1')-1]?.slice(0,3) || ''}</span>
+                        <span className="res-list-d">{parseInt(r.date?.split('-')[2] || '0')}</span>
+                        <span className="res-list-m">{MONTHS_ID[parseInt(r.date?.split('-')[1] || '1')-1]?.slice(0,3) || ''}</span>
                       </div>
                       <div className="res-list-info">
-                        <span className="res-list-time">{fmtTime(r.sesi_gym?.jam_mulai)}</span>
-                        <span className="res-list-name">{r.sesi_gym?.nama_sesi || 'Sesi Gym'}</span>
+                        <span className="res-list-time">{fmtTime(r.start_time)}</span>
+                        <span className="res-list-name">{r.gym_name || 'Sesi Gym'}</span>
                       </div>
                       <div className="res-list-action">
                         <div className="res-list-icon"><IcClock size={16} /></div>
@@ -652,12 +706,12 @@ const GymReservationPage = ({ onNavigate, user }) => {
                   {stats.historyList.length > 0 ? stats.historyList.slice(0, 3).map(r => (
                     <div key={r.id} className="res-list-card" onClick={() => onNavigate('riwayat-reservasi')}>
                       <div className="res-list-date history">
-                        <span className="res-list-d">{parseInt(r.sesi_gym?.tanggal?.split('-')[2] || '0')}</span>
-                        <span className="res-list-m">{MONTHS_ID[parseInt(r.sesi_gym?.tanggal?.split('-')[1] || '1')-1]?.slice(0,3) || ''}</span>
+                        <span className="res-list-d">{parseInt(r.date?.split('-')[2] || '0')}</span>
+                        <span className="res-list-m">{MONTHS_ID[parseInt(r.date?.split('-')[1] || '1')-1]?.slice(0,3) || ''}</span>
                       </div>
                       <div className="res-list-info">
-                        <span className="res-list-time">{fmtTime(r.sesi_gym?.jam_mulai)}</span>
-                        <span className="res-list-name">{r.sesi_gym?.nama_sesi || 'Sesi Gym'}</span>
+                        <span className="res-list-time">{fmtTime(r.start_time)}</span>
+                        <span className="res-list-name">{r.gym_name || 'Sesi Gym'}</span>
                       </div>
                       <div className="res-list-action">
                         <div className="res-badge-selesai">Selesai</div>
