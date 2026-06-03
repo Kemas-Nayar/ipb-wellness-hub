@@ -12,7 +12,7 @@ Proyek Mata Kuliah KOM 1231 Rekayasa Perangkat Lunak (RPL) Semester Genap 2025/2
 
 | Nama | NIM | Peran |
 |------|-------|-------|
-| **Prima Jaya Kusumah** | M0403241106 | Lead & Backend |
+| **Prima Jaya Kusumah** | M0403241106 | AI Engineer |
 | **Kemas Adirangga Nayar** | M0403241043 | Database & Backend |
 | **Muhammad Wafi Robbani** | M0403241013 | Frontend & UI/UX Designer |
 
@@ -22,9 +22,10 @@ Proyek Mata Kuliah KOM 1231 Rekayasa Perangkat Lunak (RPL) Semester Genap 2025/2
 
 | Lapisan | Teknologi |
 |---------|-----------|
-| **Frontend** | Vite |
-| **Backend/Database** | Supabase (PostgreSQL) |
-| **Deployment** | --- |
+| **Frontend** | Vite, React, JavaScript (59%), Tailwind CSS (37.6%) |
+| **Backend/Database** | Supabase (PostgreSQL), PLpgSQL (2.3%) |
+| **Deployment** | Vercel |
+| **Additional** | Node.js, npm |
 
 ---
 
