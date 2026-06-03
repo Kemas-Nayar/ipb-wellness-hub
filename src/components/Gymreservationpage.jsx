@@ -282,13 +282,12 @@ const SuccessState = ({ year, month, selectedDate, selectedSession, onNavigate }
 );
 
 // Fetch sessions with live count
-
 const fetchSessionsWithCount = async (year, month, selDate) => {
   const dateStr = toDateStr(year, month, selDate);
 
-
+  // Fetch sesi_gym sessions for the selected date
   const { data: sesiData, error: sesiErr } = await supabase
-    .from('sesi')
+    .from('sesi_gym')
     .select('*')
     .eq('tanggal', dateStr)
     .order('jam_mulai');
@@ -303,23 +302,27 @@ const fetchSessionsWithCount = async (year, month, selDate) => {
         }))
       : sesiData.map(s => ({ ...s, kapasitas_max: s.kapasitas_max ?? KAPASITAS }));
 
-
-  const { data: reservasi } = await supabase
-    .from('reservations')
-    .select('start_time')
-    .eq('date', dateStr);
-
+  // Count reservasi per sesi_id
+  const { data: reservasiCounts } = await supabase
+    .from('reservasi')
+    .select('sesi_id', { count: 'exact' })
+    .eq('status', 'dikonfirmasi')
+    .in('sesi_id', baseSessions.filter(s => !s.id.startsWith(dateStr)).map(s => s.id));
 
   const countMap = {};
-  (reservasi || []).forEach(r => {
-    const key = r.start_time;
-    countMap[key] = (countMap[key] || 0) + 1;
+  (baseSessions || []).forEach(s => {
+    countMap[s.id] = 0;
   });
 
+  if (reservasiCounts) {
+    reservasiCounts.forEach(r => {
+      countMap[r.sesi_id] = (countMap[r.sesi_id] || 0) + 1;
+    });
+  }
 
   return baseSessions.map(s => ({
     ...s,
-    terisi: countMap[s.jam_mulai] || 0,
+    terisi: countMap[s.id] || 0,
   }));
 };
 
@@ -338,19 +341,47 @@ const GymReservationPage = ({ onNavigate, user }) => {
 
   const [userReservations, setUserReservations] = useState([]);
   const [loadingRes, setLoadingRes] = useState(true);
+  const [penggunaId, setPenggunaId] = useState(null);
+
+  // Fetch pengguna ID from pengguna table using auth user email
+  const fetchPenggunaId = useCallback(async () => {
+    if (!user?.email) return;
+    try {
+      const { data } = await supabase
+        .from('pengguna')
+        .select('id')
+        .eq('email', user.email)
+        .single();
+      if (data?.id) {
+        setPenggunaId(data.id);
+      } else {
+        console.warn('[GymReservation] Pengguna tidak ditemukan di database');
+      }
+    } catch (err) {
+      console.error('[GymReservation] Error fetching pengguna:', err);
+    }
+  }, [user?.email]);
 
   const fetchUserReservations = useCallback(async () => {
-    if (!user) return;
+    if (!penggunaId) return;
     setLoadingRes(true);
+    // Fetch reservasi with joined sesi_gym data
     const { data } = await supabase
-      .from('reservations')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('date', { ascending: false });
+      .from('reservasi')
+      .select('id, sesi_id, status, waktu_reservasi, sesi_gym(tanggal, jam_mulai, jam_selesai, nama_sesi)')
+      .eq('pengguna_id', penggunaId)
+      .order('waktu_reservasi', { ascending: false });
+    
     setUserReservations(data || []);
     setLoadingRes(false);
-  }, [user]);
+  }, [penggunaId]);
 
+  // Fetch pengguna ID on mount
+  useEffect(() => {
+    fetchPenggunaId();
+  }, [fetchPenggunaId]);
+
+  // Fetch reservations when pengguna ID is available
   useEffect(() => {
     fetchUserReservations();
   }, [fetchUserReservations]);
@@ -359,14 +390,14 @@ const GymReservationPage = ({ onNavigate, user }) => {
 
   const stats = useMemo(() => {
     const total = userReservations.length;
-    const upcoming = userReservations.filter(r => r.date >= todayDateStr);
-    const completed = userReservations.filter(r => r.date < todayDateStr);
+    const upcoming = userReservations.filter(r => r.sesi_gym?.tanggal >= todayDateStr);
+    const completed = userReservations.filter(r => r.sesi_gym?.tanggal < todayDateStr);
     
     return {
       total,
       upcomingCount: upcoming.length,
       completedCount: completed.length,
-      upcomingList: upcoming.sort((a,b) => a.date.localeCompare(b.date)),
+      upcomingList: upcoming.sort((a,b) => (a.sesi_gym?.tanggal || '').localeCompare(b.sesi_gym?.tanggal || '')),
       historyList: completed
     };
   }, [userReservations, todayDateStr]);
@@ -374,7 +405,10 @@ const GymReservationPage = ({ onNavigate, user }) => {
   const reservationMap = useMemo(() => {
     const map = {};
     userReservations.forEach(r => {
-      map[r.date] = (map[r.date] || 0) + 1;
+      const date = r.sesi_gym?.tanggal;
+      if (date) {
+        map[date] = (map[date] || 0) + 1;
+      }
     });
     return map;
   }, [userReservations]);
@@ -402,10 +436,10 @@ const GymReservationPage = ({ onNavigate, user }) => {
     if (!selDate) return;
     const dateStr = toDateStr(year, month, selDate);
     const channel = supabase
-      .channel(`reservations-${dateStr}`)
+      .channel(`reservasi-${dateStr}`)
       .on(
         'postgres_changes',
-        { schema: 'public', table:  'reservations', filter: `date=eq.${dateStr}` },
+        { schema: 'public', table: 'reservasi' },
         () => { loadSessions(year, month, selDate); fetchUserReservations(); }
       )
       .subscribe();
@@ -425,45 +459,43 @@ const GymReservationPage = ({ onNavigate, user }) => {
   };
 
   const handleConfirm = async () => {
-    if (!selDate || !selSess || !user) return;
+    if (!selDate || !selSess || !penggunaId) return;
     setBusy(true); setError('');
 
     try {
-      const dateStr = toDateStr(year, month, selDate);
-
+      // Check if user already has a reservation for this session
       const { data: existing } = await supabase
-        .from('reservations')
+        .from('reservasi')
         .select('id')
-        .eq('user_id', user.id)
-        .eq('date', dateStr)
+        .eq('pengguna_id', penggunaId)
+        .eq('sesi_id', selSess.id)
         .maybeSingle();
 
-      if (existing) throw new Error('Kamu sudah memiliki reservasi pada tanggal ini.');
+      if (existing) throw new Error('Kamu sudah memiliki reservasi untuk sesi ini.');
 
+      // Check capacity
       const { count: currentCount } = await supabase
-        .from('reservations')
+        .from('reservasi')
         .select('id', { count: 'exact', head: true })
-        .eq('date', dateStr)
-        .eq('start_time', selSess.jam_mulai);
+        .eq('sesi_id', selSess.id)
+        .eq('status', 'dikonfirmasi');
 
       const kapasitas = selSess.kapasitas_max ?? KAPASITAS;
       if ((currentCount ?? 0) >= kapasitas) {
         throw new Error('Maaf, sesi ini baru saja penuh. Silakan pilih sesi lain.');
       }
 
+      // Insert reservation with pengguna_id from database
       const { error: err } = await supabase
-        .from('reservations')
+        .from('reservasi')
         .insert({
-          user_id:    user.id,
-          date:       dateStr,
-          start_time: selSess.jam_mulai,
-          end_time:   selSess.jam_selesai,
-          gym_name:   'NutriGym IPB',
-          notes:      selSess.nama_sesi || 'Sesi Gym',
+          pengguna_id:    penggunaId,
+          sesi_id:        selSess.id,
+          status:         'menunggu',
         });
 
       if (err) {
-        if (err.code === '23505') throw new Error('Kamu sudah memiliki reservasi pada tanggal ini.');
+        if (err.code === '23505') throw new Error('Kamu sudah memiliki reservasi untuk sesi ini.');
         throw new Error(err.message);
       }
 
@@ -576,12 +608,12 @@ const GymReservationPage = ({ onNavigate, user }) => {
                   {stats.upcomingList.length > 0 ? stats.upcomingList.slice(0, 3).map(r => (
                     <div key={r.id} className="res-list-card">
                       <div className="res-list-date upcoming">
-                        <span className="res-list-d">{parseInt(r.date.split('-')[2])}</span>
-                        <span className="res-list-m">{MONTHS_ID[parseInt(r.date.split('-')[1])-1].slice(0,3)}</span>
+                        <span className="res-list-d">{parseInt(r.sesi_gym?.tanggal?.split('-')[2] || '0')}</span>
+                        <span className="res-list-m">{MONTHS_ID[parseInt(r.sesi_gym?.tanggal?.split('-')[1] || '1')-1]?.slice(0,3) || ''}</span>
                       </div>
                       <div className="res-list-info">
-                        <span className="res-list-time">{fmtTime(r.start_time)}</span>
-                        <span className="res-list-name">{r.notes || r.gym_name}</span>
+                        <span className="res-list-time">{fmtTime(r.sesi_gym?.jam_mulai)}</span>
+                        <span className="res-list-name">{r.sesi_gym?.nama_sesi || 'Sesi Gym'}</span>
                       </div>
                       <div className="res-list-action">
                         <div className="res-list-icon"><IcClock size={16} /></div>
@@ -603,12 +635,12 @@ const GymReservationPage = ({ onNavigate, user }) => {
                   {stats.historyList.length > 0 ? stats.historyList.slice(0, 3).map(r => (
                     <div key={r.id} className="res-list-card">
                       <div className="res-list-date history">
-                        <span className="res-list-d">{parseInt(r.date.split('-')[2])}</span>
-                        <span className="res-list-m">{MONTHS_ID[parseInt(r.date.split('-')[1])-1].slice(0,3)}</span>
+                        <span className="res-list-d">{parseInt(r.sesi_gym?.tanggal?.split('-')[2] || '0')}</span>
+                        <span className="res-list-m">{MONTHS_ID[parseInt(r.sesi_gym?.tanggal?.split('-')[1] || '1')-1]?.slice(0,3) || ''}</span>
                       </div>
                       <div className="res-list-info">
-                        <span className="res-list-time">{fmtTime(r.start_time)}</span>
-                        <span className="res-list-name">{r.notes || r.gym_name}</span>
+                        <span className="res-list-time">{fmtTime(r.sesi_gym?.jam_mulai)}</span>
+                        <span className="res-list-name">{r.sesi_gym?.nama_sesi || 'Sesi Gym'}</span>
                       </div>
                       <div className="res-list-action">
                         <div className="res-badge-selesai">Selesai</div>
