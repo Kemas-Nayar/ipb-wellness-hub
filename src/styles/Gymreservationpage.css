@@ -125,6 +125,7 @@
   text-align: center;
   transition: background 0.2s ease;
   position: relative;
+  cursor: pointer;
 }
 .res-stat-item:hover { background: var(--r-light); }
 

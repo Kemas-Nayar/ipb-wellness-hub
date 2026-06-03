@@ -557,21 +557,21 @@ const GymReservationPage = ({ onNavigate, user }) => {
         <div className="res-container">
           
           <div className="res-stats-box">
-            <div className="res-stat-item">
+            <div className="res-stat-item" onClick={() => onNavigate('riwayat-reservasi')}>
               <div className="res-stat-ic"><IcCal size={18} /></div>
               <span className="res-stat-label">TOTAL RESERVASI</span>
               <span className="res-stat-value">{stats.total}</span>
               <span className="res-stat-sub">Semua waktu</span>
             </div>
             <div className="res-stat-div" />
-            <div className="res-stat-item">
+            <div className="res-stat-item" onClick={() => onNavigate('riwayat-reservasi')}>
               <div className="res-stat-ic"><IcCheckCircle size={18} /></div>
               <span className="res-stat-label">SELESAI</span>
               <span className="res-stat-value">{stats.completedCount}</span>
               <span className="res-stat-sub">Reservasi</span>
             </div>
             <div className="res-stat-div" />
-            <div className="res-stat-item">
+            <div className="res-stat-item" onClick={() => onNavigate('riwayat-reservasi')}>
               <div className="res-stat-ic"><IcClock size={18} /></div>
               <span className="res-stat-label">AKAN DATANG</span>
               <span className="res-stat-value">{stats.upcomingCount}</span>
@@ -623,7 +623,7 @@ const GymReservationPage = ({ onNavigate, user }) => {
                 </div>
                 <div className="res-list-container">
                   {stats.upcomingList.length > 0 ? stats.upcomingList.slice(0, 3).map(r => (
-                    <div key={r.id} className="res-list-card">
+                    <div key={r.id} className="res-list-card" onClick={() => onNavigate('riwayat-reservasi')}>
                       <div className="res-list-date upcoming">
                         <span className="res-list-d">{parseInt(r.sesi_gym?.tanggal?.split('-')[2] || '0')}</span>
                         <span className="res-list-m">{MONTHS_ID[parseInt(r.sesi_gym?.tanggal?.split('-')[1] || '1')-1]?.slice(0,3) || ''}</span>
@@ -650,7 +650,7 @@ const GymReservationPage = ({ onNavigate, user }) => {
                 </div>
                 <div className="res-list-container">
                   {stats.historyList.length > 0 ? stats.historyList.slice(0, 3).map(r => (
-                    <div key={r.id} className="res-list-card">
+                    <div key={r.id} className="res-list-card" onClick={() => onNavigate('riwayat-reservasi')}>
                       <div className="res-list-date history">
                         <span className="res-list-d">{parseInt(r.sesi_gym?.tanggal?.split('-')[2] || '0')}</span>
                         <span className="res-list-m">{MONTHS_ID[parseInt(r.sesi_gym?.tanggal?.split('-')[1] || '1')-1]?.slice(0,3) || ''}</span>
