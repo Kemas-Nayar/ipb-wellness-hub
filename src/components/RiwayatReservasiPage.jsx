@@ -87,8 +87,10 @@ const computeStatus = (r, now = new Date()) => {
   return 'upcoming';
 };
 
-// Sudah checkin kalau updated_at berbeda dari created_at (di-update saat scan)
+// Deteksi check-in dari kolom status (ditulis oleh QRScannerModal).
+// Fallback ke workaround timestamp untuk data lama yang belum punya kolom status.
 const hasCheckedIn = (r) => {
+  if (r.status === 'checked-in' || r.status === 'hadir') return true;
   if (!r.updated_at || !r.created_at) return false;
   return new Date(r.updated_at) - new Date(r.created_at) > 2000;
 };
@@ -150,7 +152,7 @@ const RiwayatReservasiPage = ({ onNavigate, onBack, fromPage = 'profile', user, 
 
     const { data, error: fetchError, count } = await supabase
       .from('reservations')
-      .select('id, date, start_time, end_time, gym_name, notes, created_at, updated_at', { count: 'exact' })
+      .select('id, date, start_time, end_time, gym_name, notes, status, checked_in_at, created_at, updated_at', { count: 'exact' })
       .eq('user_id', user.id)
       .order('date',       { ascending: false })
       .order('start_time', { ascending: false })

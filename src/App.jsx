@@ -355,6 +355,45 @@ export default function App() {
     };
   }, [navigateAfterAuth]);
 
+  // ── VISIBILITY CHANGE — re-validasi session saat user balik ke tab ────────
+  // Browser bisa membekukan WebSocket Supabase Realtime saat tab di-background.
+  // Handler ini memastikan: (1) session masih valid, (2) data di-refresh ulang.
+  useEffect(() => {
+    const handleVisibility = async () => {
+      if (document.visibilityState !== 'visible') return;
+      if (!isMountedRef.current) return;
+
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (!isMountedRef.current) return;
+
+        if (error) {
+          console.warn('[App] visibilitychange getSession error:', error.message);
+          return;
+        }
+
+        if (session?.user) {
+          // Session masih valid — update user state dan bump refreshKey
+          // agar semua komponen yang bergantung data Supabase re-fetch.
+          setUser(session.user);
+          setRefreshKey(k => k + 1);
+        } else {
+          // Session benar-benar expired — paksa ke landing
+          console.info('[App] visibilitychange: session expired, redirecting to landing');
+          setUser(null);
+          setProfile(null);
+          setPage('landing');
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      } catch (err) {
+        console.warn('[App] visibilitychange handler error:', err.message);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── RENDER ────────────────────────────────────────────────────────────────
   const showLoading = !animDone || !appReady;
 
