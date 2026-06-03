@@ -184,9 +184,17 @@ const ConfirmPage = ({ onNavigate, biodata }) => {
         updated_at:    new Date().toISOString(),
       };
 
-      const { error: upsertError } = await supabase
+      // Timeout 12 detik — cegah stuck "Menyimpan..." selamanya
+      // (terjadi jika RLS block secara diam-diam atau koneksi bermasalah)
+      const upsertPromise = supabase
         .from('profiles')
         .upsert(payload, { onConflict: 'id' });
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('REQUEST_TIMEOUT')), 12_000)
+      );
+
+      const { error: upsertError } = await Promise.race([upsertPromise, timeoutPromise]);
 
       if (upsertError) throw upsertError;
 
@@ -201,22 +209,27 @@ const ConfirmPage = ({ onNavigate, biodata }) => {
       console.error('[ConfirmPage] upsert failed:', err);
 
       if (!isMountedRef.current) return;
-      if (err?.code === '23505') {
+
+      if (err?.message === 'REQUEST_TIMEOUT') {
+        setError('Waktu penyimpanan habis. Periksa koneksi dan coba lagi. Jika masalah berlanjut, hubungi admin.');
+      } else if (err?.code === '23505') {
         setError('Data sudah tersimpan. Mengarahkan...');
         redirectTimerRef.current = setTimeout(() => {
           if (isMountedRef.current) onNavigate('home');
         }, 1500);
       } else if (err?.message?.includes('JWT') || err?.code === 'PGRST301') {
         setError('Sesi kadaluarsa. Silakan login kembali.');
+      } else if (err?.code === '42501' || err?.message?.includes('policy')) {
+        setError('Tidak diizinkan menyimpan data. Hubungi admin untuk mengaktifkan akun.');
       } else if (
-        err instanceof TypeError ||                
+        err instanceof TypeError ||
         err?.message?.toLowerCase().includes('failed to fetch') ||
         err?.message?.toLowerCase().includes('networkerror') ||
-        err?.message?.toLowerCase().includes('load failed')   
+        err?.message?.toLowerCase().includes('load failed')
       ) {
         setError('Tidak dapat terhubung ke server. Periksa koneksi internet Anda.');
       } else {
-        setError('Gagal menyimpan data. Silakan coba lagi.');
+        setError(`Gagal menyimpan data: ${err?.message || 'Silakan coba lagi.'}`);
       }
     } finally {
       if (isMountedRef.current) setIsLoading(false);
