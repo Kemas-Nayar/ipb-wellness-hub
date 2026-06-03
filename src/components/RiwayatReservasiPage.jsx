@@ -189,7 +189,12 @@ const RiwayatReservasiPage = ({ onNavigate, onBack, fromPage = 'profile', user, 
         { event: '*', schema: 'public', table: 'reservations', filter: `user_id=eq.${user.id}` },
         (payload) => {
           if (payload.eventType === 'INSERT') {
-            setReservations(prev => [payload.new, ...prev]);
+            // Cek duplikat sebelum prepend — bisa terjadi jika fetchPage dan realtime keduanya aktif
+            setReservations(prev => {
+              const alreadyExists = prev.some(r => r.id === payload.new.id);
+              if (alreadyExists) return prev;
+              return [payload.new, ...prev];
+            });
           } else if (payload.eventType === 'UPDATE') {
             setReservations(prev =>
               prev.map(r => r.id === payload.new.id ? { ...r, ...payload.new } : r)
@@ -204,18 +209,55 @@ const RiwayatReservasiPage = ({ onNavigate, onBack, fromPage = 'profile', user, 
   }, [user?.id]);
 
   const confirmCancel = async (id) => {
+    // Simpan data reservasi sebelum dihapus dari state
+    const cancelledReservation = reservations.find(r => r.id === id);
+
+    // Optimistic update dulu agar UI langsung responsif
+    setReservations(prev => prev.filter(r => r.id !== id));
     try {
       const { error: err } = await supabase
         .from('reservations')
         .delete()
         .eq('id', id);
       if (err) throw err;
-      setReservations(prev => prev.filter(r => r.id !== id));
+
+      // Juga hapus dari reservasi (singular) agar slot kapasitas terbebas & bisa daftar ulang
+      if (cancelledReservation?.date && cancelledReservation?.start_time && user?.email) {
+        // Cari sesi_id dari sesi_gym berdasarkan tanggal & jam
+        const { data: sesiData } = await supabase
+          .from('sesi_gym')
+          .select('id')
+          .eq('tanggal', cancelledReservation.date)
+          .eq('jam_mulai', cancelledReservation.start_time)
+          .maybeSingle();
+
+        // Cari penggunaId dari tabel pengguna
+        const { data: penggunaData } = await supabase
+          .from('pengguna')
+          .select('id')
+          .ilike('email', user.email)
+          .maybeSingle();
+
+        if (sesiData?.id && penggunaData?.id) {
+          const { error: errReservasi } = await supabase
+            .from('reservasi')
+            .delete()
+            .eq('pengguna_id', penggunaData.id)
+            .eq('sesi_id', sesiData.id);
+          if (errReservasi) {
+            console.warn('[Cancel] Gagal hapus dari reservasi (singular):', errReservasi.message);
+          }
+        }
+      }
+
       toast.success('Reservasi berhasil dibatalkan.');
     } catch (e) {
+      // Rollback: fetch ulang jika gagal
+      fetchPage(1, true);
       toast.error('Gagal membatalkan reservasi: ' + e.message);
     }
   };
+
 
   const withStatus = reservations.map(r => ({ ...r, _status: computeStatus(r, now) }));
   const filtered   = filter === 'all' ? withStatus : withStatus.filter(r => r._status === filter);
