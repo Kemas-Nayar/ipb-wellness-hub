@@ -521,10 +521,9 @@ const GymReservationPage = ({ onNavigate, user }) => {
       const { error: errReservasi } = await supabase
         .from('reservasi')
         .insert({
-          pengguna_id:      penggunaId,
-          sesi_id:          selSess.id,
-          status:           'dikonfirmasi',
-          waktu_konfirmasi: new Date().toISOString(),
+          pengguna_id: penggunaId,
+          sesi_id:     selSess.id,
+          status:      'menunggu',
         });
 
       if (errReservasi) {

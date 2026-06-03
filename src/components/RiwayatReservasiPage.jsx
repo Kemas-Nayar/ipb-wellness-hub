@@ -87,12 +87,10 @@ const computeStatus = (r, now = new Date()) => {
   return 'upcoming';
 };
 
-// Deteksi check-in dari kolom status (ditulis oleh QRScannerModal).
-// Fallback ke workaround timestamp untuk data lama yang belum punya kolom status.
+// Deteksi check-in dari kolom status saja (ditulis oleh QRScannerModal).
+// Workaround timestamp dihapus karena menyebabkan false positive untuk reservasi baru.
 const hasCheckedIn = (r) => {
-  if (r.status === 'checked-in' || r.status === 'hadir') return true;
-  if (!r.updated_at || !r.created_at) return false;
-  return new Date(r.updated_at) - new Date(r.created_at) > 2000;
+  return r.status === 'checked-in' || r.status === 'hadir';
 };
 
 const SkeletonCard = () => (
@@ -135,39 +133,95 @@ const RiwayatReservasiPage = ({ onNavigate, onBack, fromPage = 'profile', user, 
   const [now,       setNow]             = useState(() => new Date());
   const [showScannerId, setShowScannerId] = useState(null);
   const [cancelReservation, setCancelReservation] = useState(null);
+  const [penggunaId, setPenggunaId]     = useState(null);
   const loaderRef                       = useRef(null);
 
+  // Timer untuk update status real-time
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 30_000);
     return () => clearInterval(id);
   }, []);
+
+  // Fetch penggunaId agar bisa query tabel reservasi (singular)
+  useEffect(() => {
+    if (!user?.email) return;
+    supabase
+      .from('pengguna')
+      .select('id')
+      .ilike('email', user.email)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.id) setPenggunaId(data.id);
+      });
+  }, [user?.email]);
 
   const fetchPage = useCallback(async (pageNum = 1, isRefresh = false) => {
     if (!user?.id) return;
     isRefresh ? setRefreshing(true) : setLoading(true);
     setError(null);
 
-    const from = (pageNum - 1) * PAGE_SIZE;
-    const to   = from + PAGE_SIZE - 1;
+    try {
+      // Sumber UTAMA: reservasi (singular) — punya status admin (menunggu/dikonfirmasi/hadir)
+      // Semua booking modern masuk sini, sehingga gate admin aktif
+      let reservasiItems = [];
+      if (penggunaId) {
+        const { data: reservasiData } = await supabase
+          .from('reservasi')
+          .select('id, sesi_id, status, waktu_reservasi, sesi_gym(tanggal, jam_mulai, jam_selesai, nama_sesi)')
+          .eq('pengguna_id', penggunaId)
+          .order('waktu_reservasi', { ascending: false });
 
-    const { data, error: fetchError, count } = await supabase
-      .from('reservations')
-      .select('id, date, start_time, end_time, gym_name, notes, status, checked_in_at, created_at, updated_at', { count: 'exact' })
-      .eq('user_id', user.id)
-      .order('date',       { ascending: false })
-      .order('start_time', { ascending: false })
-      .range(from, to);
+        reservasiItems = (reservasiData || [])
+          .filter(r => r.sesi_gym?.tanggal)
+          .map(r => ({
+            id:            r.id,
+            date:          r.sesi_gym.tanggal,
+            start_time:    r.sesi_gym.jam_mulai,
+            end_time:      r.sesi_gym.jam_selesai,
+            gym_name:      r.sesi_gym.nama_sesi || 'Sesi Gym',
+            status:        r.status,
+            notes:         null,
+            created_at:    r.waktu_reservasi,
+            updated_at:    r.waktu_reservasi,
+            checked_in_at: null,
+            _fromReservasi: true,
+            _sesiId:       r.sesi_id,
+          }));
+      }
 
-    if (fetchError) {
-      setError('Gagal memuat data reservasi. Coba lagi.');
-    } else if (data) {
-      setReservations(prev => pageNum === 1 ? data : [...prev, ...data]);
+      // Sumber SEKUNDER: reservations (plural) — hanya untuk data legacy tanpa entri di reservasi
+      const from = (pageNum - 1) * PAGE_SIZE;
+      const to   = from + PAGE_SIZE - 1;
+      const { data: resData, error: fetchError, count } = await supabase
+        .from('reservations')
+        .select('id, date, start_time, end_time, gym_name, notes, status, checked_in_at, created_at, updated_at', { count: 'exact' })
+        .eq('user_id', user.id)
+        .order('date',       { ascending: false })
+        .order('start_time', { ascending: false })
+        .range(from, to);
+
+      if (fetchError) throw fetchError;
+
+      // Tambahkan dari reservations HANYA jika tidak ada di reservasi (legacy data)
+      const reservasiKeys = new Set(reservasiItems.map(r => `${r.date}|${r.start_time}`));
+      const legacyItems = (resData || []).filter(r => !reservasiKeys.has(`${r.date}|${r.start_time}`));
+
+      // Gabung & urutkan
+      const merged = [...reservasiItems, ...legacyItems]
+        .sort((a, b) => {
+          const d = (b.date || '').localeCompare(a.date || '');
+          return d !== 0 ? d : (b.start_time || '').localeCompare(a.start_time || '');
+        });
+
+      setReservations(prev => pageNum === 1 ? merged : [...prev, ...merged]);
       setHasMore((count ?? 0) > pageNum * PAGE_SIZE);
       setPage(pageNum);
+    } catch (e) {
+      setError('Gagal memuat data reservasi. Coba lagi.');
     }
 
     isRefresh ? setRefreshing(false) : setLoading(false);
-  }, [user?.id]);
+  }, [user?.id, penggunaId]);
 
   useEffect(() => { fetchPage(1); }, [fetchPage, refreshTrigger]);
 
@@ -215,37 +269,42 @@ const RiwayatReservasiPage = ({ onNavigate, onBack, fromPage = 'profile', user, 
     // Optimistic update dulu agar UI langsung responsif
     setReservations(prev => prev.filter(r => r.id !== id));
     try {
-      const { error: err } = await supabase
-        .from('reservations')
-        .delete()
-        .eq('id', id);
-      if (err) throw err;
+      if (cancelledReservation?._fromReservasi) {
+        // Item dari tabel reservasi (singular) — hapus langsung
+        const { error: err } = await supabase
+          .from('reservasi')
+          .delete()
+          .eq('id', id);
+        if (err) throw err;
+      } else {
+        // Item dari tabel reservations (plural) — hapus lalu sync reservasi
+        const { error: err } = await supabase
+          .from('reservations')
+          .delete()
+          .eq('id', id);
+        if (err) throw err;
 
-      // Juga hapus dari reservasi (singular) agar slot kapasitas terbebas & bisa daftar ulang
-      if (cancelledReservation?.date && cancelledReservation?.start_time && user?.email) {
-        // Cari sesi_id dari sesi_gym berdasarkan tanggal & jam
-        const { data: sesiData } = await supabase
-          .from('sesi_gym')
-          .select('id')
-          .eq('tanggal', cancelledReservation.date)
-          .eq('jam_mulai', cancelledReservation.start_time)
-          .maybeSingle();
+        // Juga hapus dari reservasi (singular) agar slot kapasitas terbebas & bisa daftar ulang
+        if (cancelledReservation?.date && cancelledReservation?.start_time && user?.email) {
+          const { data: sesiData } = await supabase
+            .from('sesi_gym')
+            .select('id')
+            .eq('tanggal', cancelledReservation.date)
+            .eq('jam_mulai', cancelledReservation.start_time)
+            .maybeSingle();
 
-        // Cari penggunaId dari tabel pengguna
-        const { data: penggunaData } = await supabase
-          .from('pengguna')
-          .select('id')
-          .ilike('email', user.email)
-          .maybeSingle();
+          const { data: penggunaData } = await supabase
+            .from('pengguna')
+            .select('id')
+            .ilike('email', user.email)
+            .maybeSingle();
 
-        if (sesiData?.id && penggunaData?.id) {
-          const { error: errReservasi } = await supabase
-            .from('reservasi')
-            .delete()
-            .eq('pengguna_id', penggunaData.id)
-            .eq('sesi_id', sesiData.id);
-          if (errReservasi) {
-            console.warn('[Cancel] Gagal hapus dari reservasi (singular):', errReservasi.message);
+          if (sesiData?.id && penggunaData?.id) {
+            await supabase
+              .from('reservasi')
+              .delete()
+              .eq('pengguna_id', penggunaData.id)
+              .eq('sesi_id', sesiData.id);
           }
         }
       }
@@ -378,8 +437,55 @@ const RiwayatReservasiPage = ({ onNavigate, onBack, fromPage = 'profile', user, 
                           style={{ opacity: 0.3 }}>
                           <IconCheck />
                         </div>
+                      ) : r._fromReservasi && r.status !== 'dikonfirmasi' ? (
+                        /* Menunggu konfirmasi admin — belum bisa check-in */
+                        <div style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: 4
+                        }}>
+                          <div style={{
+                            width: 36, height: 36,
+                            borderRadius: '50%',
+                            background: '#FFF8E7',
+                            border: '1.5px solid #F59E0B',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: 16
+                          }}>⏳</div>
+                          <span style={{
+                            fontSize: 9,
+                            color: '#F59E0B',
+                            fontWeight: 700,
+                            textAlign: 'center',
+                            lineHeight: 1.2,
+                            fontFamily: "'Poppins', sans-serif"
+                          }}>Menunggu<br/>Konfirmasi</span>
+                          <button
+                            onClick={() => setCancelReservation(r)}
+                            style={{
+                              marginTop: 2,
+                              background: '#FFE8EB',
+                              border: '1.5px solid #FFD0D6',
+                              color: '#C8102E',
+                              fontSize: 9,
+                              fontWeight: 700,
+                              fontFamily: "'Poppins', sans-serif",
+                              cursor: 'pointer',
+                              padding: '4px 6px',
+                              borderRadius: '8px',
+                              width: '100%',
+                              textAlign: 'center',
+                            }}
+                            title="Batalkan Sesi"
+                          >
+                            Batal
+                          </button>
+                        </div>
                       ) : (
-                        /* Belum checkin, masih bisa — tombol QR & Batal */
+                        /* Sudah dikonfirmasi admin — bisa check-in */
                         <>
                           <button
                             className="riwayat-checkin-btn"
