@@ -25,7 +25,7 @@ const IconError = () => (
 
 const VALID_QR_PAYLOAD = "NUTRIGYM_CHECKIN";
 
-const QRScannerModal = ({ reservationId, onClose, onSuccess }) => {
+const QRScannerModal = ({ reservationId, fromReservasi = false, onClose, onSuccess }) => {
   const [scanState, setScanState] = useState('scanning'); // 'scanning', 'success', 'error', 'processing'
   const [errorMsg, setErrorMsg] = useState('');
   const scannerRef = useRef(null);
@@ -41,19 +41,27 @@ const QRScannerModal = ({ reservationId, onClose, onSuccess }) => {
     }
 
     try {
-      // Process Check-in via Supabase
-      // FIX: was only updating updated_at — admin dashboard never saw "Hadir"
       const now = new Date().toISOString();
-      const { error } = await supabase
-        .from('reservations')
-        .update({
-          status:         'checked-in',
-          checked_in_at:  now,
-          updated_at:     now,
-        })
-        .eq('id', reservationId);
 
-      if (error) throw error;
+      if (fromReservasi) {
+        // Reservasi modern — update tabel reservasi (singular)
+        const { error } = await supabase
+          .from('reservasi')
+          .update({ status: 'hadir' })
+          .eq('id', reservationId);
+        if (error) throw error;
+      } else {
+        // Reservasi legacy — update tabel reservations (plural)
+        const { error } = await supabase
+          .from('reservations')
+          .update({
+            status:        'checked-in',
+            checked_in_at: now,
+            updated_at:    now,
+          })
+          .eq('id', reservationId);
+        if (error) throw error;
+      }
 
       setScanState('success');
     } catch (err) {

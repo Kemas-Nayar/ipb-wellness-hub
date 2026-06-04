@@ -131,7 +131,7 @@ const RiwayatReservasiPage = ({ onNavigate, onBack, fromPage = 'profile', user, 
   const [page,      setPage]            = useState(1);
   const [hasMore,   setHasMore]         = useState(false);
   const [now,       setNow]             = useState(() => new Date());
-  const [showScannerId, setShowScannerId] = useState(null);
+  const [showScannerData, setShowScannerData] = useState(null); // { id, fromReservasi }
   const [cancelReservation, setCancelReservation] = useState(null);
   const [penggunaId, setPenggunaId]     = useState(null);
   const loaderRef                       = useRef(null);
@@ -489,7 +489,7 @@ const RiwayatReservasiPage = ({ onNavigate, onBack, fromPage = 'profile', user, 
                         <>
                           <button
                             className="riwayat-checkin-btn"
-                            onClick={() => setShowScannerId(r.id)}
+                            onClick={() => setShowScannerData({ id: r.id, fromReservasi: !!r._fromReservasi })}
                             title="Scan QR untuk check-in"
                             aria-label={`Check-in untuk reservasi ${r.gym_name || 'Gym'}`}
                           >
@@ -534,12 +534,13 @@ const RiwayatReservasiPage = ({ onNavigate, onBack, fromPage = 'profile', user, 
         </>
       )}
 
-      {showScannerId && (
+      {showScannerData && (
         <QRScannerModal
-          reservationId={showScannerId}
-          onClose={() => setShowScannerId(null)}
+          reservationId={showScannerData.id}
+          fromReservasi={showScannerData.fromReservasi}
+          onClose={() => setShowScannerData(null)}
           onSuccess={() => {
-            setShowScannerId(null);
+            setShowScannerData(null);
             fetchPage(1, true); // Refresh list to show checkmark
           }}
         />
